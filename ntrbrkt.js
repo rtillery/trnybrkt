@@ -129,7 +129,10 @@ function CreateArray(dimargs) {
 
 function DumpPools(pools) {
   for (var poolNum = 0; poolNum < pools.length; poolNum++) {
-    console.log(`----- Pool ${poolNum} -----`);
+    console.log("\n   " + pools[poolNum].name);
+    console.log("   " + pools[poolNum].location);
+    console.log("   " + pools[poolNum].time);
+    console.log("----------------------");
     for (var seedNum = 0; seedNum < pools[poolNum].length; seedNum++) {
       var teamInfo = pools[poolNum][seedNum];
       if (teamInfo) {
@@ -250,6 +253,11 @@ function SeparateClubTeams(options, numTeams, pools) {
 
 function TeamListToPools(teamList, options) {
   var pools = CreateArray(options.totalPools, options.teamsPerPool);
+for (var poolNum = 0; poolNum < pools.length; poolNum++) {
+  pools[poolNum].name = `Pool ${poolNum + 1}`;
+  pools[poolNum].location = "Courtside"; // TODO: Deal with court assignments
+  pools[poolNum].time = "8:00 AM"; // TODO: Deal with court times
+}
   for (var teamIdx = 0; teamIdx < teamList.length; teamIdx++) {
     var poolSpot = SeedToPoolSpot(options, teamIdx);
     pools[poolSpot.poolNum][poolSpot.seed] = teamList[teamIdx];
@@ -296,3 +304,15 @@ pools = TeamListToPools(teams, options);
 
 DumpPools(pools);
 //console.log(pools);
+
+/*
+const http = require('http');
+
+const server = http.createServer((req, res) => {
+  res.end('Hello World\n');
+});
+
+server.listen(4242, () => {
+  console.log('Server is running...');
+});
+*/
