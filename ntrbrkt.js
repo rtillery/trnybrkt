@@ -205,7 +205,7 @@ function FindSwapSpot(pool, seedIdx, numSeeds, team, pools, options) {
   var jumpDistance = 1;
   var reachedStart = false;
   var reachedEnd = false;
-  while (!reacheStart && !reachedEnd) {
+  while (!reachedStart && !reachedEnd) {
     var checkIdx = seedIdx + jumpDistance;
     if (checkIdx < 0) {
       reachedStart = true;
@@ -259,16 +259,6 @@ function TeamListToPools(teamList, options) {
   return pools;
 }
 
-// TODO: Avoid same club in same pool.
-//   * Add club entry to team above
-//   * Add option to avoid same club in pool to options below
-//   * Check for repeats in same pool
-//   * Swap team up or down in seed/between pools
-//   * Handle >2 teams from same club per pool
-//   * Handle swapped teams that are same club
-//   * Handle first & last pool swaps
-//   * Handle swap into pool with same club
-
 defaultOptions = {
   totalPools: Math.floor((teams.length + 3) / 4),
   powerPools: 0,
@@ -299,6 +289,7 @@ options = CopyObj(defaultOptions);
 
 // Override from tournament
 //options.totalPools = 12;
+options.powerPools = 2;
 options.avoidSameClub = true;
 
 pools = TeamListToPools(teams, options);
