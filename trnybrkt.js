@@ -297,22 +297,101 @@ options = CopyObj(defaultOptions);
 
 // Override from tournament
 //options.totalPools = 12;
-options.powerPools = 2;
-options.avoidSameClub = true;
+//options.powerPools = 2;
+//options.avoidSameClub = true;
 
 pools = TeamListToPools(teams, options);
 
-DumpPools(pools);
+//DumpPools(pools);
 //console.log(pools);
 
-/*
+function PageHeader(res) {
+  res.write("<!DOCTYPE html PUBLIC '-//W3C//DTD HTML 4.01 Transitional//EN'>\n");
+  res.write("<html lang='en'>\n");
+  res.write("<meta http-equiv='Content-Language' content='en'></meta>\n");
+  res.write("<head>\n");
+  res.write("<meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>\n");
+  res.write("<link rel='stylesheet' type='text/css' href='test.css'>\n");
+  res.write("</head>\n");
+}
+
+function PoolPage(res, pools) {
+  PageHeader(res);
+  res.write("<body>\n");
+  res.write("<div class='tourney'>NTR Bid Regionals 14 Open</div>\n");
+  res.write("<div class='date'>May 5, 2018</div>\n");
+  for (var poolBase = 0; poolBase < pools.length; poolBase += 3) {
+    res.write("<div id='container'>\n");
+    for (var rowPool = 0; rowPool < 3; rowPool++) {
+      var poolNum = poolBase + rowPool;
+      if (poolNum < pools.length) {
+        res.write("  <div class='pool'>\n");
+        res.write(`    <div class='poolheading'>Pool ${poolNum + 1}</div>\n`);
+        res.write(`    <div class='court'>${pools[poolNum].location}</div>\n`);
+        res.write(`    <div class='time'>${pools[poolNum].time}</div>\n`);
+        res.write("    <hr>\n");
+        for (var seedNum = 0; seedNum < pools[poolNum].length; seedNum++) {
+          var team = pools[poolNum][seedNum];
+          if (team)
+            res.write(`    <div>${team.friendlyName}</div>\n`);
+          else
+            res.write("    <div></div>\n");
+        }
+        res.write("  </div>\n");
+      }
+    }
+    res.write("</div>\n");
+  }
+  res.end("</body>");
+}
+
 const http = require('http');
+const fs = require('fs');
+
+/* https://stackoverflow.com/a/28838314 */
+var server = http.createServer(
+  function (req, res) {
+//console.log(`req.url: ${req.url}\n`);
+    if (req.url === "/index.html")
+      PoolPage(res, pools);
+    else {
+      fs.readFile('./' + req.url, function(err, data) {
+        if (!err) {
+          var dotoffset = req.url.lastIndexOf('.');
+          var mimetype = dotoffset == -1
+                        ? 'text/plain'
+                        : {
+                          '.html' : 'text/html',
+                          '.ico' : 'image/x-icon',
+                          '.jpg' : 'image/jpeg',
+                          '.png' : 'image/png',
+                          '.gif' : 'image/gif',
+                          '.css' : 'text/css',
+                          '.js' : 'text/javascript'
+                        }[ req.url.substr(dotoffset) ];
+          res.setHeader('Content-type' , mimetype);
+          res.end(data);
+  //        console.log( req.url, mimetype );
+        } else {
+          console.log ('file not found: ' + req.url);
+          res.writeHead(404, "Not Found");
+          res.end();
+        }
+      });
+    }
+  });
+
+/*
+const server = http.createServer((req, res) => {
+  PoolPage(res, pools);
+});
+
 
 const server = http.createServer((req, res) => {
   res.end('Hello World\n');
 });
+*/
 
 server.listen(4242, () => {
   console.log('Server is running...');
 });
-*/

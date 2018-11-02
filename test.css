@@ -1,0 +1,45 @@
+body {
+    font-family: Arial, sans-serif;
+    font-size: 14pt;
+    font-weight: 400;
+  }
+  #container {
+    padding: 16pt 10% 0 10%;
+      text-align: justify;
+  }
+  #container > div {
+      display: inline-block;
+      vertical-align: top;
+  
+      /* IE fix. */
+      *display: inline;
+      zoom: 1;
+  }
+  #container:after {
+      content: "";
+      width: 100%;
+      display: inline-block;
+  }
+  .tourney {
+    padding-top: 48pt;
+    text-align: center;
+    font-size: 28pt;
+    font-weight: 700;
+  }
+  .date {
+    padding-top: 32pt;
+    padding-bottom: 8pt;
+    text-align: center;
+    font-size: 18pt;
+    font-weight: 700;
+  }
+  .poolheading {
+    font-weight: 700;
+  }
+  .court, .time {
+    font-size: 12pt;
+  }
+  .pool {
+    text-align: center;
+  }
+  
