@@ -311,21 +311,35 @@ function PageHeader(res) {
   res.write("<meta http-equiv='Content-Language' content='en'></meta>\n");
   res.write("<head>\n");
   res.write("<meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>\n");
-  res.write("<link rel='stylesheet' type='text/css' href='test.css'>\n");
+  res.write("<link rel='stylesheet' type='text/css' href='sched-classic.css'>\n");
   res.write("</head>\n");
 }
 
+function PageFooter(res) {
+  res.end("</html>");
+}
+
 function PoolPage(res, pools) {
+
+const name = "NTR Bid Regionals 14 Open";
+const date = "May 5, 2018";
+
   PageHeader(res);
   res.write("<body>\n");
-  res.write("<div class='tourney'>NTR Bid Regionals 14 Open</div>\n");
-  res.write("<div class='date'>May 5, 2018</div>\n");
-  for (var poolBase = 0; poolBase < pools.length; poolBase += 3) {
-    res.write("<div id='container'>\n");
-    for (var rowPool = 0; rowPool < 3; rowPool++) {
+
+  res.write("<div class='tablecontainer'>\n");
+
+  const columns = 3;
+  res.write("  <table class='pooltable'><tbody>\n");
+  res.write(`    <tr><td colspan='${columns}' class='name'>${name}</td></tr>\n`);
+  res.write(`    <tr><td colspan='${columns}' class='date'>${date}</td></tr>\n`);
+
+  for (var poolBase = 0; poolBase < pools.length; poolBase += columns) {
+    res.write("    <tr>\n");
+    for (var rowPool = 0; rowPool < columns; rowPool++) {
+      res.write("      <td class='pool'>\n");
       var poolNum = poolBase + rowPool;
       if (poolNum < pools.length) {
-        res.write("  <div class='pool'>\n");
         res.write(`    <div class='poolheading'>Pool ${poolNum + 1}</div>\n`);
         res.write(`    <div class='court'>${pools[poolNum].location}</div>\n`);
         res.write(`    <div class='time'>${pools[poolNum].time}</div>\n`);
@@ -335,14 +349,19 @@ function PoolPage(res, pools) {
           if (team)
             res.write(`    <div>${team.friendlyName}</div>\n`);
           else
-            res.write("    <div></div>\n");
+            res.write(`    <div>&nbsp;</div>\n`);
         }
-        res.write("  </div>\n");
       }
+      res.write("      </td>\n");
     }
-    res.write("</div>\n");
+    res.write("    </tr>\n");
   }
-  res.end("</body>");
+  res.write("  </tbody></table>\n");
+
+  res.write("</div>\n");
+
+  res.end("</body>\n");
+  PageFooter(res);
 }
 
 const http = require('http');

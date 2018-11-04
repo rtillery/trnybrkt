@@ -1,0 +1,41 @@
+body {
+  font-family: Arial, sans-serif;
+  font-size: 14pt;
+  font-weight: 400;
+}
+.tablecontainer {
+  
+}
+.pooltable {
+  margin-left: auto;
+  margin-right: auto;
+  white-space: nowrap;
+}
+.pooltable tr, .pooltable td {
+  padding: 18pt 48pt;
+}
+.name {
+  padding-top: 0;
+  text-align: center;
+  font-size: 28pt;
+  font-weight: 700;
+}
+.pool {
+  text-align: center;
+  vertical-align: top;
+  font-size: 14pt;
+}
+.date {
+  text-align: center;
+  font-size: 18pt;
+  font-weight: 700;
+}
+.poolheading {
+  font-weight: 700;
+}
+.court, .time {
+  font-size: 12pt;
+}
+.pool hr {
+  margin: 0.1em auto;
+}
