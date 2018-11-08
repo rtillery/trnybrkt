@@ -1,0 +1,107 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang='en'>
+<meta http-equiv='Content-Language' content='en'>
+<script type='text/javascript' src='jquery-3.3.1.min.js'></script>
+<head>
+<meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>
+<style>
+.label {
+  text-align: right;
+}
+</style>
+<script>
+function onLocationChange() {
+  var locations = $("textarea[name='locations']").val().split("\n");
+  var times = $("textarea[name='times']").val().split("\n");
+  console.log(locations);
+  console.log(times);
+  var headerrow = "<tr><th></th>";
+  var checkrow = "";
+  for (var col = 0; col < times.length; col++) {
+    headerrow += `<th>${times[col]}</th>`;
+    checkrow += "<td><input type='checkbox' checked></td>";
+  }
+  headerrow += "</tr>";
+  console.log(headerrow);
+  $('.matrix thead').html(headerrow);
+  for (var row = 0; row < locations.length; row++) {
+    var newrow = `<tr><td><b>${locations[row]}</b></td>${checkrow}</tr>`;
+    console.log(newrow);
+    $('.matrix tbody').append(newrow);
+  }
+}
+function onTimeChange() { onLocationChange() }
+
+teams = [];
+
+function onExcelPaste() {
+  var data = $('textarea[name=excel_data]').val();
+    console.log(data);
+  var rows = data.split("\n");
+
+teams = [];
+  var table = $('<table />');
+  for(var y in rows) {
+      var cells = rows[y].split("\t");
+teams[y] = { club: cells[0], team: cells[1], friendlyName: cells[2], code: cells[3], points: cells[5] };
+      var row = $('<tr />');
+      for(var x in cells) {
+          row.append('<td>'+cells[x]+'</td>');
+      }
+      table.append(row);
+  }
+
+  // Insert into DOM
+  $('#excel_table').html(table);
+}
+
+var request = new XMLHttpRequest();
+function SendData() {
+console.log(`readyState: ${request.readyState}, status: ${request.status}`);
+  if (request.readyState == 4 && request.status == 200) {
+    alert('Data sent...\n');
+  } else {
+    alert('Connection FAIL,\nCheck connection and Retry!!!');
+    console.log(request);
+  }
+}
+function RequestHandler(data) {
+  var url = 'http:/localhost:4242/server.js';
+  request.open('POST', url, true);
+  request.onreadystatechange = SendData;
+  request.send(data);
+}
+
+function GeneratePool() {
+  RequestHandler(JSON.stringify(teams));
+}
+</script>
+</head>
+<body>
+  <form>
+    <table><tbody>
+      <tr><td class='label'>Pool Name:</td><td><input type='text' name='name'><br></td></tr>
+      <tr><td class='label'>Pool Date:</td><td><input type='date' name='date'><br></tr></tr>
+      <tr><td class='label'>Locations:</td><td><textarea name="locations" cols="40" rows="6" onchange='onLocationChange()'></textarea><br></td></td>
+      <tr><td class='label'>Times:</td><td><textarea name="times" cols="10" rows="2" onchange='onTimeChange()'>8:00 AM&NewLine;3:00 PM</textarea><br></td></tr>
+      <table class='matrix'>
+        <thead></thead>
+        <tbody></tbody>
+      </table>
+    </tbody></table>
+    <textarea name='excel_data' cols='20' rows='1' onchange='onExcelPaste()'></textarea>
+    <!--
+      [key to track tourney]
+      Pool name
+      Pool date
+      Location/time table
+      Table entry field
+      Power pools (default ULR?)
+      Teams per pool (default 4)
+      Pools (default teams / 4)
+      Submit button
+    -->
+    <input type="button" onclick="GeneratePool()" value="Generate Pools"/>
+</form>
+<div id='excel_table'></div>
+</body>

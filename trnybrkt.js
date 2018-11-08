@@ -255,8 +255,8 @@ function TeamListToPools(teamList, options) {
   var pools = CreateArray(options.totalPools, options.teamsPerPool);
 for (var poolNum = 0; poolNum < pools.length; poolNum++) {
   pools[poolNum].name = `Pool ${poolNum + 1}`;
-  pools[poolNum].location = "Courtside"; // TODO: Deal with court assignments
-  pools[poolNum].time = "8:00 AM"; // TODO: Deal with court times
+  pools[poolNum].location = options.locations[Math.floor(poolNum / options.times.length) % options.locations.length];
+  pools[poolNum].time = options.times[poolNum % options.times.length];
 }
   for (var teamIdx = 0; teamIdx < teamList.length; teamIdx++) {
     var poolSpot = SeedToPoolSpot(options, teamIdx);
@@ -268,6 +268,10 @@ for (var poolNum = 0; poolNum < pools.length; poolNum++) {
 }
 
 defaultOptions = {
+  groupName: 'UNKNOWN',
+  date: 'UNKNOWN',
+  locations: [],
+  times: [],
   totalPools: Math.floor((teams.length + 3) / 4),
   powerPools: 0,
   teamsPerPool: 4,
@@ -296,6 +300,20 @@ for (var seed = 0; seed < testOptions.teams; seed++) {
 options = CopyObj(defaultOptions);
 
 // Override from tournament
+options.groupName = "NTR Bid Regional 14 Open";
+options.date = "May 5, 2018";
+options.locations = [
+  "Courtside Court 1",
+  "Courtside Court 2",
+  "Courtside Court 3",
+  "Courtside Court 4",
+  "Courtside Court 5",
+  "Courtside Court 6",
+];
+options.times = [
+  "8:00 AM",
+  "3:00 PM",
+];
 //options.totalPools = 12;
 //options.powerPools = 2;
 //options.avoidSameClub = true;
@@ -321,8 +339,8 @@ function PageFooter(res) {
 
 function PoolPage(res, pools) {
 
-const name = "NTR Bid Regionals 14 Open";
-const date = "May 5, 2018";
+const name = options.groupName;
+const date = options.date;
 
   PageHeader(res);
   res.write("<body>\n");
@@ -370,33 +388,51 @@ const fs = require('fs');
 /* https://stackoverflow.com/a/28838314 */
 var server = http.createServer(
   function (req, res) {
-//console.log(`req.url: ${req.url}\n`);
-    if (req.url === "/index.html")
-      PoolPage(res, pools);
-    else {
-      fs.readFile('./' + req.url, function(err, data) {
-        if (!err) {
-          var dotoffset = req.url.lastIndexOf('.');
-          var mimetype = dotoffset == -1
-                        ? 'text/plain'
-                        : {
-                          '.html' : 'text/html',
-                          '.ico' : 'image/x-icon',
-                          '.jpg' : 'image/jpeg',
-                          '.png' : 'image/png',
-                          '.gif' : 'image/gif',
-                          '.css' : 'text/css',
-                          '.js' : 'text/javascript'
-                        }[ req.url.substr(dotoffset) ];
-          res.setHeader('Content-type' , mimetype);
-          res.end(data);
-  //        console.log( req.url, mimetype );
-        } else {
-          console.log ('file not found: ' + req.url);
-          res.writeHead(404, "Not Found");
-          res.end();
-        }
-      });
+console.log(`req.url: ${req.url}\n`);
+    if (req.method == 'POST') {
+console.log("POST");
+var body = '';
+req.on('data', function (data) {
+  body += data;
+});
+req.on('end', function (data) {
+teams = JSON.parse(body);
+//for (var i = 0; i < teams.length; i++) {
+//  console.log(`${teams[i].friendlyName}`);
+//}
+pools = TeamListToPools(teams, options);
+});
+res.writeHead(200, {'Content-Type': 'text/html'});
+res.end('post received');
+    } else {
+console.log("GET");
+      if (req.url === "/index.html")
+        PoolPage(res, pools);
+      else {
+        fs.readFile('./' + req.url, function(err, data) {
+          if (!err) {
+            var dotoffset = req.url.lastIndexOf('.');
+            var mimetype = dotoffset == -1
+                          ? 'text/plain'
+                          : {
+                            '.html' : 'text/html',
+                            '.ico' : 'image/x-icon',
+                            '.jpg' : 'image/jpeg',
+                            '.png' : 'image/png',
+                            '.gif' : 'image/gif',
+                            '.css' : 'text/css',
+                            '.js' : 'text/javascript'
+                          }[ req.url.substr(dotoffset) ];
+            res.setHeader('Content-type' , mimetype);
+            res.end(data);
+//console.log( req.url, mimetype );
+          } else {
+            console.log ('file not found: ' + req.url);
+            res.writeHead(404, "Not Found");
+            res.end();
+          }
+        });
+      }
     }
   });
 
