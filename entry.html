@@ -10,6 +10,7 @@
 }
 </style>
 <script>
+
 function onLocationChange() {
   var locations = $("textarea[name='locations']").val().split("\n");
   var times = $("textarea[name='times']").val().split("\n");
@@ -56,6 +57,7 @@ teams[y] = { club: cells[0], team: cells[1], friendlyName: cells[2], code: cells
 }
 
 var request = new XMLHttpRequest();
+
 function SendData() {
 console.log(`readyState: ${request.readyState}, status: ${request.status}`);
   if (request.readyState == 4 && request.status == 200) {
@@ -65,25 +67,81 @@ console.log(`readyState: ${request.readyState}, status: ${request.status}`);
     console.log(request);
   }
 }
-function RequestHandler(data) {
+function SendDataToServer(data) {
   var url = 'http:/localhost:4242/server.js';
   request.open('POST', url, true);
   request.onreadystatechange = SendData;
   request.send(data);
 }
 
-function GeneratePool() {
-  RequestHandler(JSON.stringify(teams));
+function GatherLocationsAndTimes() {
+  var locations = $("textarea[name='locations']").val().split('\n');
+  var times = $("textarea[name='times']").val().split('\n');
+  var tablerow = $('.matrix tbody tr:first-child');
+  var locationsAndTimes = [];
+  var location = 0;
+  $('.matrix tbody tr').each(function() {
+    var time = 0;
+    $('td', this).each(function() {
+      locationsAndTimes.push({
+        location: locations[location],
+        time: times[time],
+      });
+      time++;
+    });
+    location++;
+  });
+  return locationsAndTimes;
+}
+
+function SendEntryDataToServer() {
+  var name = $("input[name='name']").val();
+  var date = $("input[name='date']").val();
+  var dateFormat = $('#dateformats').val();
+  var locationsAndTimes = GatherLocationsAndTimes();
+  var entryData = {
+    name: name,
+    date: date,
+    dateFormat: dateFormat,
+    locationsAndTimes: locationsAndTimes,
+    teams: teams,
+  };
+console.log(entryData);
+  var postData = JSON.stringify(entryData);
+  SendDataToServer(postData);
+}
+
+function GetLang() {
+  if (navigator.languages && navigator.languages.length) {
+    return navigator.languages[0];
+  } else {
+    return navigator.userLanguage || navigator.language || navigator.browserLanguage || 'en-US';
+  }
+}
+dateOptions = [
+  { year: 'numeric', month: 'long', day: 'numeric' },
+  { year: '2-digit', month: 'numeric', day: 'numeric'},
+  { year: 'numeric', month: 'numeric', day: 'numeric'},
+];
+function onDateChange() {
+  $('#dateformats').children('option').remove();
+  $.each(dateOptions, function(index, value){
+    console.log(value);
+    console.log($("input[name='date']").val());
+    var format = new Date($("input[name='date']").val() + 'T00:00:00');
+    console.log(format);
+    $('#dateformats').append($('<option>', { 'value': index, 'text': format.toLocaleDateString(GetLang(), value) }));
+  });
 }
 </script>
 </head>
 <body>
   <form>
     <table><tbody>
-      <tr><td class='label'>Pool Name:</td><td><input type='text' name='name'><br></td></tr>
-      <tr><td class='label'>Pool Date:</td><td><input type='date' name='date'><br></tr></tr>
-      <tr><td class='label'>Locations:</td><td><textarea name="locations" cols="40" rows="6" onchange='onLocationChange()'></textarea><br></td></td>
-      <tr><td class='label'>Times:</td><td><textarea name="times" cols="10" rows="2" onchange='onTimeChange()'>8:00 AM&NewLine;3:00 PM</textarea><br></td></tr>
+      <tr><td class='label'>Event Name:</td><td><input type='text' name='name'></td></tr>
+      <tr><td class='label'>Event Date:</td><td><input type='date' name='date' onchange='onDateChange()'>&nbsp;Format:&nbsp;<select id='dateformats'></select></tr></tr>
+      <tr><td class='label'>Locations:</td><td><textarea name="locations" cols="40" rows="6" onchange='onLocationChange()'></textarea></td></td>
+      <tr><td class='label'>Times:</td><td><textarea name="times" cols="10" rows="2" onchange='onTimeChange()'>8:00 AM&NewLine;3:00 PM</textarea></td></tr>
       <table class='matrix'>
         <thead></thead>
         <tbody></tbody>
@@ -101,7 +159,7 @@ function GeneratePool() {
       Pools (default teams / 4)
       Submit button
     -->
-    <input type="button" onclick="GeneratePool()" value="Generate Pools"/>
+    <input type="button" onclick="SendEntryDataToServer()" value="Generate Pools"/>
 </form>
 <div id='excel_table'></div>
 </body>

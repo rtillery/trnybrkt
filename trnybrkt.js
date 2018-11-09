@@ -44,7 +44,7 @@ teams = [
   { friendlyName: "Attack 14 White" },
   { friendlyName: "Knights 14 Adidas White" },
 */
-
+/*
   { club: 'Texas Image', team: '14 Mizuno Zack', friendlyName: 'Image 14 Miz Zack', code: 'FJ4TXIMG1NT', points: 93.476 },
   { club: 'Excel Volleyball', team: '14 National Red', friendlyName: 'EXCEL 14 National Red', code: 'FJ4EXCEL1NT', points: 93.302 },
   { club: 'Dallas Arsenal VBC', team: '14 Gold', friendlyName: 'Arsenal 14 Gold', code: 'FJ4DAVBC1NT', points: 91.343 },
@@ -91,6 +91,7 @@ teams = [
   { club: 'Madfrog ', team: '14\'S ELITE BLACK', friendlyName: 'Madfrog 14E Black', code: 'FJ4FROGS4NT', points: 54.548 },
   { club: 'Knights Volleyball Academy', team: 'Knights 14 Adidas White', friendlyName: 'Knights 14 Adidas White', code: 'FJ4KNIVA2NT', points: 53.228 },
   { club: 'LoneStar Volleyball Club', team: 'LoneStar 14 Gunter', friendlyName: 'LoneStar 14 Gunter', code: 'FJ4LSTAR5NT', points: 48.759 },
+*/
 /*
   { club: 'A', team: '1', friendlyName: 'A1', code: 'FOOBARA1', points: 90.0 },
   { club: 'B', team: '1', friendlyName: 'B1', code: 'FOOBARB1', points: 85.0 },
@@ -268,7 +269,7 @@ for (var poolNum = 0; poolNum < pools.length; poolNum++) {
 }
 
 defaultOptions = {
-  groupName: 'UNKNOWN',
+  name: 'UNKNOWN',
   date: 'UNKNOWN',
   locations: [],
   times: [],
@@ -314,14 +315,9 @@ options.times = [
   "8:00 AM",
   "3:00 PM",
 ];
-//options.totalPools = 12;
+options.totalPools = 12;
 //options.powerPools = 2;
 //options.avoidSameClub = true;
-
-pools = TeamListToPools(teams, options);
-
-//DumpPools(pools);
-//console.log(pools);
 
 function PageHeader(res) {
   res.write("<!DOCTYPE html PUBLIC '-//W3C//DTD HTML 4.01 Transitional//EN'>\n");
@@ -396,19 +392,25 @@ req.on('data', function (data) {
   body += data;
 });
 req.on('end', function (data) {
-teams = JSON.parse(body);
+teams = JSON.parse(body).teams;
 //for (var i = 0; i < teams.length; i++) {
 //  console.log(`${teams[i].friendlyName}`);
 //}
+console.log(JSON.parse(body));
 pools = TeamListToPools(teams, options);
 });
 res.writeHead(200, {'Content-Type': 'text/html'});
 res.end('post received');
     } else {
 console.log("GET");
-      if (req.url === "/index.html")
+      if (req.url === "/index.html") {
+        pools = TeamListToPools(teams, options);
+
+        //DumpPools(pools);
+        //console.log(pools);
+        
         PoolPage(res, pools);
-      else {
+      } else {
         fs.readFile('./' + req.url, function(err, data) {
           if (!err) {
             var dotoffset = req.url.lastIndexOf('.');
