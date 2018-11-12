@@ -5,8 +5,30 @@
 <head>
 <meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>
 <style>
+body {
+  font-family: serif;
+  font-size: 16px;
+}
 .label {
   text-align: right;
+}
+.disabled {
+  color: lightgray;
+}
+button {
+  width: 100%;
+  font-weight: 700;
+}
+.event, .event th, .event td {
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+.event tbody tr td, .event thead tr th {
+  text-align: center;
+  width: auto;
+}
+.dynawidth {
+  display: inline-block;
 }
 </style>
 <script>
@@ -109,6 +131,8 @@ function SendEntryDataToServer() {
 console.log(entryData);
   var postData = JSON.stringify(entryData);
   SendDataToServer(postData);
+
+  return false; // ???
 }
 
 function GetLang() {
@@ -133,21 +157,200 @@ function onDateChange() {
     $('#dateformats').append($('<option>', { 'value': index, 'text': format.toLocaleDateString(GetLang(), value) }));
   });
 }
+// https://ntrvolleyball.net/wp-content/uploads/2017/08/Power-Pool-Format-Information-1.pdf
+//    Teams : Power Pools, Teams per Power Pool
+//    <= 12 :      0     ,          0
+// 13 <= 16 :      1     ,          3
+// 17 <= 24 :      1     ,          4
+// 25 <= 32 :      2     ,          3
+// 33 <=    :      2     ,          4
+
+//                    date 1
+//                 time 1 time 2
+//         court 1   o      o
+// venue 1 court 2   o      o
+//         [add]
+// venue 2 court 1   o      o
+//         [add]
+//  [add]
+
+//                    date 1
+//                 time 1 time 2
+//         court 1   o      o
+// venue 1 court 2   o      o
+// venue 2 court 1   o      o
+
+// From: https://codepen.io/Momciloo/pen/bpyMbB (no spaces w/input)
+//       & http://jsfiddle.net/philfreo/MqM76/
+$.fn.GetTextWidth = function(text, font) {
+  if (!$.fn.GetTextWidth.tempSpan)
+    $.fn.GetTextWidth.tempSpan = $('<span>').hide().appendTo(document.body);
+  $.fn.GetTextWidth.tempSpan
+   .text(text || this.val() || this.text() || this.attr('placeholder'))
+   .css('font', font || this.css('font'));
+  return $.fn.GetTextWidth.tempSpan.width();
+};
+
+$(document).ready(function(){
+
+  $('.dynawidth').on('input', function() {
+    var inputWidth = $(this).GetTextWidth();
+    $(this).css({
+      width: inputWidth
+    })
+  }).trigger('input');
+
+  $('.dynawidth').keydown(function(e) {
+    curposondown = window.getSelection().anchorOffset;
+  });
+  $('.dynawidth').keyup(function(e) {
+    console.log(e);
+    var element = e.currentTarget;
+    var key = e.which;
+    var text = element.textContent;
+    var pos = window.getSelection().anchorOffset;
+    console.log(`text: ${text}`);
+    console.log(`text length: ${text.length}`);
+    console.log(`char: ${e.which}`);
+    console.log(`cursor: ${pos}`);
+    switch (key) {
+      case 8: // [Backspace]
+        if (text.length <= 0) {
+          e.preventDefault();
+          // Delete this header (unless only in this row) and move to previous in this row (unless first)
+        }
+        break;
+      // case 9: // [Tab]
+      //   // Move to next header in this row (unless last)
+      //   break;
+      case 13: // [Enter]
+        e.preventDefault();
+        // Create a new header in this row/column
+        break;
+      // case 16: // [Shift]+[Tab]
+      //   // Move to previous header in this row (unless first)
+      //   break;
+      case 37: // [←] (left arrow)
+        if (pos <= 0 && curposondown <= 0) {
+          e.preventDefault();
+          // Move to previous header in this row (unless first)
+          var div = $(document.activeElement).closest('th').prev().children('.dynawidth');
+          if (div) {
+console.log(div);
+            div.focus();
+var sel, range;
+if (window.getSelection && document.createRange) {
+  range = document.createRange();
+  range.selectNodeContents(div[0]);
+range.setStart(div[0], 1);
+range.setEnd(div[0], 1);
+//  range.collapse(false);
+//  sel = window.getSelection();
+//  sel.removeAllRanges();
+//  sel.addRange(range);
+//div[0].removeAllRanges();
+//div[0].addRange(range);
+} else if (document.body.createTextRange) {
+  range = document.body.createTextRange();
+  range.moveToElementText(div[0]);
+  range.collapse(false);
+  range.select();
+}
+          }
+        }
+        break;
+      case 38: // [↑] (up arrow)
+        e.preventDefault();
+        // Move to previous header row (unless first)
+        break;
+      case 39: // [→] (right arrow)
+        if (pos >= text.length && curposondown >= text.length) {
+          e.preventDefault();
+          // Move to next header in this row (unless last)
+          $(document.activeElement).closest('th').next().children('.dynawidth').focus();
+          curposondown = 1000;
+        }
+        break;
+      case 40: // [↓] (down arrow)
+        e.preventDefault();
+        // Move to next header row (unless last)
+        break;
+      case 46: // [Delete]
+        if (text.length <= 0) {
+          e.preventDefault();
+          // Delete this header (unless only in this row) and move to next in this row (unless last)
+        }
+        break;
+    }
+  });
+
+});
+
+// dates/times
+// venues/locations
+// rows & columns
+
 </script>
 </head>
 <body>
   <form>
     <table><tbody>
-      <tr><td class='label'>Event Name:</td><td><input type='text' name='name'></td></tr>
-      <tr><td class='label'>Event Date:</td><td><input type='date' name='date' onchange='onDateChange()'>&nbsp;Format:&nbsp;<select id='dateformats'></select></tr></tr>
-      <tr><td class='label'>Locations:</td><td><textarea name="locations" cols="40" rows="6" onchange='onLocationChange()'></textarea></td></td>
-      <tr><td class='label'>Times:</td><td><textarea name="times" cols="10" rows="2" onchange='onTimeChange()'>8:00 AM&NewLine;3:00 PM</textarea></td></tr>
-      <table class='matrix'>
-        <thead></thead>
-        <tbody></tbody>
-      </table>
-    </tbody></table>
-    <textarea name='excel_data' cols='20' rows='1' onchange='onExcelPaste()'></textarea>
+      <tr>
+        <td class='label'>Event Name:</td>
+        <td><input type='text' name='name'></td>
+      </tr>
+      <tr>
+        <td class='label'>Event Date:</td>
+        <td><input type='date' name='date' onchange='onDateChange()'>&nbsp;Format:&nbsp;<select id='dateformats'></select></td>
+      </tr>
+      <tr>
+        <td class='label'>Power Pools:</td>
+        <td><input type='checkbox'></td>
+      </tr>
+      <tr>
+        <td class='label disabled'>Number of Power Pools:</td>
+        <td><input type='number' min='0' max='2' step='1' value='0' disabled></td>
+      </tr>
+      <tr>
+        <td class='label disabled'>Teams per Power Pool:</td>
+        <td><input type='number' min='3' max='4' value='3' disabled></td>
+      </tr>
+      <tr>
+        <td class='label'>Locations:</td>
+        <td><textarea name="locations" cols="40" rows="6" onchange='onLocationChange()'></textarea></td>
+      </tr>
+      <tr>
+        <td class='label'>Times:</td>
+        <td><textarea name="times" cols="10" rows="2" onchange='onTimeChange()'>8:00 AM&NewLine;3:00 PM</textarea></td>
+      </tr>
+      <tr><td colspan='2'>
+        <table class='matrix'>
+          <thead></thead>
+          <tbody></tbody>
+        </table>
+      </td></tr>
+      <tr>
+        <td class='label'>Paste Team List Here:</td>
+        <td><textarea name='excel_data' cols='20' rows='1' onchange='onExcelPaste()'></textarea></td>
+      </tr>
+
+      <tr><td colspan='2'>
+        <tr><td colspan='2'>
+            <table class='event'>
+              <thead>
+                <tr><th colspan='2'></th><th colspan='2'><div class='dynawidth' contenteditable>May 5, 2018</div></th><th colspan='2'><div class='dynawidth' contenteditable>May 6, 2018</div></th></tr>
+                <tr><th colspan='2'></th><th><div class='dynawidth' contenteditable>8:00 AM</div></th><th><div class='dynawidth' contenteditable>3:00 PM</div></th><th><div class='dynawidth' contenteditable>8:00 AM</div></th><th><div class='dynawidth' contenteditable>3:00 PM</div></th></tr>
+              </thead>
+              <tbody>
+                <tr><th rowspan='2'></div><div class='dynawidth' contenteditable>Venue 1</div></th><th><div class='dynawidth' contenteditable>Court 1</div></th><td><input type='checkbox' checked></td><td><input type='checkbox' checked></td><td><input type='checkbox' checked></td><td><input type='checkbox' checked></tr>
+                <tr><th><div class='dynawidth' contenteditable>Court 2</div></th><td><input type='checkbox' checked></td><td><input type='checkbox' checked></td><td><input type='checkbox' checked></td><td><input type='checkbox' checked></tr>
+                <tr><th rowspan='2'><div class='dynawidth' contenteditable>Venue 2</div></th><th><div class='dynawidth' contenteditable>Court 1</div></th><td><input type='checkbox' checked></td><td><input type='checkbox' checked></td><td><input type='checkbox' checked></td><td><input type='checkbox' checked></tr>
+                <tr><th><div class='dynawidth' contenteditable>Court 2</div></th><td><input type='checkbox' checked></td><td><input type='checkbox' checked></td><td><input type='checkbox' checked></td><td><input type='checkbox' checked></tr>
+              </tbody>
+            </table>
+          </td></tr>
+
+        </tbody></table>
     <!--
       [key to track tourney]
       Pool name
@@ -159,7 +362,7 @@ function onDateChange() {
       Pools (default teams / 4)
       Submit button
     -->
-    <input type="button" onclick="SendEntryDataToServer()" value="Generate Pools"/>
+    <br><input type="button" onclick="SendEntryDataToServer()" value="Generate Pools"/>
 </form>
 <div id='excel_table'></div>
 </body>
