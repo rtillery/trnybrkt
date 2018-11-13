@@ -29,6 +29,10 @@ button {
 }
 .dynawidth {
   display: inline-block;
+  font-family: serif;
+  font-weight: 700;
+  font-size: 16px;
+  border: none;
 }
 </style>
 <script>
@@ -165,21 +169,6 @@ function onDateChange() {
 // 25 <= 32 :      2     ,          3
 // 33 <=    :      2     ,          4
 
-//                    date 1
-//                 time 1 time 2
-//         court 1   o      o
-// venue 1 court 2   o      o
-//         [add]
-// venue 2 court 1   o      o
-//         [add]
-//  [add]
-
-//                    date 1
-//                 time 1 time 2
-//         court 1   o      o
-// venue 1 court 2   o      o
-// venue 2 court 1   o      o
-
 // From: https://codepen.io/Momciloo/pen/bpyMbB (no spaces w/input)
 //       & http://jsfiddle.net/philfreo/MqM76/
 $.fn.GetTextWidth = function(text, font) {
@@ -191,24 +180,46 @@ $.fn.GetTextWidth = function(text, font) {
   return $.fn.GetTextWidth.tempSpan.width();
 };
 
+// https://stackoverflow.com/a/841121
+$.fn.SelectRange = function(start, end) {
+  if(end === undefined) {
+    end = start;
+  }
+  return this.each(function() {
+    if('selectionStart' in this) {
+      this.selectionStart = start;
+      this.selectionEnd = end;
+    } else if(this.setSelectionRange) {
+      this.setSelectionRange(start, end);
+    } else if(this.createTextRange) {
+      var range = this.createTextRange();
+      range.collapse(true);
+      range.moveEnd('character', end);
+      range.moveStart('character', start);
+      range.select();
+    }
+  });
+};
+
 $(document).ready(function(){
 
   $('.dynawidth').on('input', function() {
-    var inputWidth = $(this).GetTextWidth();
+    var paddingAndBorder = $(this).outerWidth() - $(this).width();
+    var inputWidth = $(this).GetTextWidth() + paddingAndBorder;
     $(this).css({
       width: inputWidth
     })
   }).trigger('input');
 
   $('.dynawidth').keydown(function(e) {
-    curposondown = window.getSelection().anchorOffset;
+    curposondown = this.selectionStart;
   });
   $('.dynawidth').keyup(function(e) {
     console.log(e);
     var element = e.currentTarget;
     var key = e.which;
-    var text = element.textContent;
-    var pos = window.getSelection().anchorOffset;
+    var text = $(this).val();
+    var pos = this.selectionStart;
     console.log(`text: ${text}`);
     console.log(`text length: ${text.length}`);
     console.log(`char: ${e.which}`);
@@ -235,27 +246,9 @@ $(document).ready(function(){
           e.preventDefault();
           // Move to previous header in this row (unless first)
           var div = $(document.activeElement).closest('th').prev().children('.dynawidth');
-          if (div) {
-console.log(div);
+          if (div[0]) {
             div.focus();
-var sel, range;
-if (window.getSelection && document.createRange) {
-  range = document.createRange();
-  range.selectNodeContents(div[0]);
-range.setStart(div[0], 1);
-range.setEnd(div[0], 1);
-//  range.collapse(false);
-//  sel = window.getSelection();
-//  sel.removeAllRanges();
-//  sel.addRange(range);
-//div[0].removeAllRanges();
-//div[0].addRange(range);
-} else if (document.body.createTextRange) {
-  range = document.body.createTextRange();
-  range.moveToElementText(div[0]);
-  range.collapse(false);
-  range.select();
-}
+            div.SelectRange(div.val().length);
           }
         }
         break;
@@ -294,6 +287,17 @@ range.setEnd(div[0], 1);
 </head>
 <body>
   <form>
+    <!--
+      [key to track tourney]
+      Pool name
+      Pool date
+      Location/time table
+      Table entry field
+      Power pools (default ULR?)
+      Teams per pool (default 4)
+      Pools (default teams / 4)
+      Submit button
+    -->
     <table><tbody>
       <tr>
         <td class='label'>Event Name:</td>
@@ -335,33 +339,21 @@ range.setEnd(div[0], 1);
       </tr>
 
       <tr><td colspan='2'>
-        <tr><td colspan='2'>
-            <table class='event'>
-              <thead>
-                <tr><th colspan='2'></th><th colspan='2'><div class='dynawidth' contenteditable>May 5, 2018</div></th><th colspan='2'><div class='dynawidth' contenteditable>May 6, 2018</div></th></tr>
-                <tr><th colspan='2'></th><th><div class='dynawidth' contenteditable>8:00 AM</div></th><th><div class='dynawidth' contenteditable>3:00 PM</div></th><th><div class='dynawidth' contenteditable>8:00 AM</div></th><th><div class='dynawidth' contenteditable>3:00 PM</div></th></tr>
-              </thead>
-              <tbody>
-                <tr><th rowspan='2'></div><div class='dynawidth' contenteditable>Venue 1</div></th><th><div class='dynawidth' contenteditable>Court 1</div></th><td><input type='checkbox' checked></td><td><input type='checkbox' checked></td><td><input type='checkbox' checked></td><td><input type='checkbox' checked></tr>
-                <tr><th><div class='dynawidth' contenteditable>Court 2</div></th><td><input type='checkbox' checked></td><td><input type='checkbox' checked></td><td><input type='checkbox' checked></td><td><input type='checkbox' checked></tr>
-                <tr><th rowspan='2'><div class='dynawidth' contenteditable>Venue 2</div></th><th><div class='dynawidth' contenteditable>Court 1</div></th><td><input type='checkbox' checked></td><td><input type='checkbox' checked></td><td><input type='checkbox' checked></td><td><input type='checkbox' checked></tr>
-                <tr><th><div class='dynawidth' contenteditable>Court 2</div></th><td><input type='checkbox' checked></td><td><input type='checkbox' checked></td><td><input type='checkbox' checked></td><td><input type='checkbox' checked></tr>
-              </tbody>
-            </table>
-          </td></tr>
+        <table class='event'>
+          <thead>
+            <tr><th colspan='2'></th><th colspan='2'><input type='text' class='dynawidth' value='May 5, 2018'></th><th colspan='2'><input type='text' class='dynawidth' value='May 6, 2018'></th></tr>
+            <tr><th colspan='2'></th><th><input type='text' class='dynawidth' value='8:00 AM'></th><th><input type='text' class='dynawidth' value='3:00 PM'></th><th><input type='text' class='dynawidth' value='8:00 AM'></th><th><input type='text' class='dynawidth' value='3:00 PM'></th></tr>
+          </thead>
+          <tbody>
+            <tr><th rowspan='2'><input type='text' class='dynawidth' value='Venue 1'></th><th><input type='text' class='dynawidth' value='Court 1'></th><td><input type='checkbox' checked></td><td><input type='checkbox' checked></td><td><input type='checkbox' checked></td><td><input type='checkbox' checked></tr>
+            <tr><th><input type='text' class='dynawidth' value='Court 2'></th><td><input type='checkbox' checked></td><td><input type='checkbox' checked></td><td><input type='checkbox' checked></td><td><input type='checkbox' checked></tr>
+            <tr><th rowspan='2'><input type='text' class='dynawidth' value='Venue 2'></th><th><input type='text' class='dynawidth' value='Court 1'></th><td><input type='checkbox' checked></td><td><input type='checkbox' checked></td><td><input type='checkbox' checked></td><td><input type='checkbox' checked></tr>
+            <tr><th><input type='text' class='dynawidth' value='Court 2'></th><td><input type='checkbox' checked></td><td><input type='checkbox' checked></td><td><input type='checkbox' checked></td><td><input type='checkbox' checked></tr>
+          </tbody>
+        </table>
+      </td></tr>
 
-        </tbody></table>
-    <!--
-      [key to track tourney]
-      Pool name
-      Pool date
-      Location/time table
-      Table entry field
-      Power pools (default ULR?)
-      Teams per pool (default 4)
-      Pools (default teams / 4)
-      Submit button
-    -->
+    </tbody></table>
     <br><input type="button" onclick="SendEntryDataToServer()" value="Generate Pools"/>
 </form>
 <div id='excel_table'></div>
