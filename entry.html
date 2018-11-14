@@ -212,18 +212,9 @@ $(document).ready(function(){
   }).trigger('input');
 
   $('.dynawidth').keydown(function(e) {
-    curposondown = this.selectionStart;
-  });
-  $('.dynawidth').keyup(function(e) {
-    console.log(e);
-    var element = e.currentTarget;
     var key = e.which;
     var text = $(this).val();
     var pos = this.selectionStart;
-    console.log(`text: ${text}`);
-    console.log(`text length: ${text.length}`);
-    console.log(`char: ${e.which}`);
-    console.log(`cursor: ${pos}`);
     switch (key) {
       case 8: // [Backspace]
         if (text.length <= 0) {
@@ -234,15 +225,11 @@ $(document).ready(function(){
       // case 9: // [Tab]
       //   // Move to next header in this row (unless last)
       //   break;
-      case 13: // [Enter]
-        e.preventDefault();
-        // Create a new header in this row/column
-        break;
       // case 16: // [Shift]+[Tab]
       //   // Move to previous header in this row (unless first)
       //   break;
       case 37: // [←] (left arrow)
-        if (pos <= 0 && curposondown <= 0) {
+        if (pos <= 0) {
           e.preventDefault();
           // Move to previous header in this row (unless first)
           var div = $(document.activeElement).closest('th').prev().children('.dynawidth');
@@ -255,13 +242,20 @@ $(document).ready(function(){
       case 38: // [↑] (up arrow)
         e.preventDefault();
         // Move to previous header row (unless first)
+        var thisth = $(this).closest('th');
+        var thistr = $(this).closest('tr');
+        var prevtr = thistr.prev('tr');
+console.log(`${prevtr.length ? 'is prev' : 'no prev'}`);
+var idx = thisth.index();
+console.log(`idx: ${idx}`);
+        if (prevtr.length)
+          prevtr.children('th').eq(idx).children('.dynawidth').focus();
         break;
       case 39: // [→] (right arrow)
-        if (pos >= text.length && curposondown >= text.length) {
+        if (pos >= text.length) {
           e.preventDefault();
           // Move to next header in this row (unless last)
           $(document.activeElement).closest('th').next().children('.dynawidth').focus();
-          curposondown = 1000;
         }
         break;
       case 40: // [↓] (down arrow)
@@ -273,6 +267,22 @@ $(document).ready(function(){
           e.preventDefault();
           // Delete this header (unless only in this row) and move to next in this row (unless last)
         }
+        break;
+    }
+  });
+  $('.dynawidth').keyup(function(e) {
+    console.log(e);
+    var key = e.which;
+    var text = $(this).val();
+    var pos = this.selectionStart;
+    console.log(`text: ${text}`);
+    console.log(`text length: ${text.length}`);
+    console.log(`char: ${e.which}`);
+    console.log(`cursor: ${pos}`);
+    switch (key) {
+      case 13: // [Enter]
+        e.preventDefault();
+        // Create a new header in this row/column
         break;
     }
   });
