@@ -201,7 +201,33 @@ $.fn.SelectRange = function(start, end) {
   });
 };
 
-$(document).ready(function(){
+function VirtIdxToRealIdx($tr, virtIdx) {
+  var realIdx = 0;
+  $tr.children('th').each(function (i, th) {
+    if (i < virtIdx)
+      realIdx += parseInt($(th).attr('colspan')) || 1;
+    else
+      return false;
+  });
+  return realIdx;
+}
+
+function RealIdxToVirtIdx($tr, realIdx) {
+  var virtIdx = 0;
+  var chkRealIdx = 0;
+  var th, colspan;
+  while (true) {
+    th = $tr.children('th').eq(virtIdx);
+    colspan = parseInt($(th).attr('colspan')) || 1;
+    chkRealIdx += colspan;
+    if (realIdx < chkRealIdx)
+      break;
+    virtIdx++;
+  }
+  return virtIdx;
+}
+
+$(document).ready(function() {
 
   $('.dynawidth').on('input', function() {
     var paddingAndBorder = $(this).outerWidth() - $(this).width();
@@ -245,11 +271,9 @@ $(document).ready(function(){
         var thisth = $(this).closest('th');
         var thistr = $(this).closest('tr');
         var prevtr = thistr.prev('tr');
-console.log(`${prevtr.length ? 'is prev' : 'no prev'}`);
-var idx = thisth.index();
-console.log(`idx: ${idx}`);
+        var newidx = RealIdxToVirtIdx(prevtr, VirtIdxToRealIdx(thistr, thisth.index()));
         if (prevtr.length)
-          prevtr.children('th').eq(idx).children('.dynawidth').focus();
+          prevtr.children('th').eq(newidx).children('.dynawidth').focus();
         break;
       case 39: // [→] (right arrow)
         if (pos >= text.length) {
@@ -261,6 +285,12 @@ console.log(`idx: ${idx}`);
       case 40: // [↓] (down arrow)
         e.preventDefault();
         // Move to next header row (unless last)
+        var thisth = $(this).closest('th');
+        var thistr = $(this).closest('tr');
+        var nexttr = thistr.next('tr');
+        var newidx = RealIdxToVirtIdx(nexttr, VirtIdxToRealIdx(thistr, thisth.index()));
+        if (nexttr.length)
+          nexttr.children('th').eq(newidx).children('.dynawidth').focus();
         break;
       case 46: // [Delete]
         if (text.length <= 0) {
