@@ -1,0 +1,76 @@
+	0	1	2	3	4	...
+0			0,2	0,3	0,4
+1			1,2	1,3	1,4
+2	2,0	2,1
+3	3,0	3,1
+4	4,0	4,1
+.
+.
+.
+
+if (col > 1)
+  if (row == 0)
+    // date
+    if ([Enter]) && (cursorpos == label.length)
+      // Add new column to the right
+        // coords = { left: date.cellPos.left + date.colspan - 1, top: 0 };
+        // datecell = table.cellFromPos(coords);
+        // datecell.after("<th><div class='dynawidth'></div></th>");
+        // coords.top += 1;
+        // timecell = table.cellFromPos(coords);
+        // timecell.after("<th><div class='dynawidth'></div></th>");
+        // for (var row = coords.top + 1; row < table.dims.height; row++)
+          // coords.top = row;
+          // var cell = table.cellFromPos(coords);
+          // cell.after("<td><input type='check'></td>");
+        // table.scan(true);
+    else if ([Backspace] || [Delete]) && (col > 2) && (label.length == 0)
+      // Remove column (and all spanned columns)
+        // coords = { left: date.cellPos.left + date.colspan - 1, top: 0 };
+        // datecell = table.cellFromPos(coords);
+        // datecell.remove()
+        // coords.top + 1;
+        // for (var colcoords = {left: coords.left, top: coords.top}; colcoords.left < coords.left + date.colspan; colcoords.left++)
+          // var cell = table.cellFromPos(colcoords);
+          // cell.remove();
+        // table.scan(true);
+  else if (row == 1)
+    // time
+    if ([Enter]) && (cursorpos == label.length)
+      // Extend date above colspan by 1 & add new column to the right
+        // coords = { left: date.cellPos.left, top: 0 };
+        // datecell = table.cellFromPos(coords);
+        // datecell.attr('colspan', datecell.attr('colspan') + 1);
+        // coords.top += 1;
+        // timecell = table.cellFromPos(coords);
+        // timecell.after("<th><div class='dynawidth'></div></th>");
+        // for (var row = coords.top + 1; row < table.dims.height; row++)
+          // coords.top = row;
+          // var cell = table.cellFromPos(coords);
+          // cell.after("<td><input type='check'></td>");
+        // table.scan(true);
+    else if ([Backspace] || [Delete]) && (date.colspan > 1) && (label.length == 0)
+      // Reduce date above colspan by 1 & remove column
+        // coords = { left: date.cellPos.left, top: 0 };
+        // datecell = table.cellFromPos(coords);
+        // var colspan = datecell.attr('colspan');
+        // if (colspan > 1)
+          // datecell.attr('colspan', colspan - 1);
+        // coords.top += 1;
+        // for (var colcoords = {left: coords.left, top: coords.top}; colcoords.left < coords.left + date.colspan; colcoords.left++)
+          // var cell = table.cellFromPos(colcoords);
+          // cell.remove();
+        // table.scan(true);
+else if (row > 1)
+  if (col == 0)
+    // venue
+    if ([Enter]) && (cursorpos == label.length)
+      // Add new row below
+    else if ([Backspace] || [Delete]) && (row > 2) && (label.length == 0)
+      // Remove row (and all spanned rows)
+  else if (col == 1)
+    // court
+    if ([Enter]) && (cursorpos == label.length)
+      // Extend venue to the left rowspan by 1 & add new row below
+    else if ([Backspace] || [Delete]) && (venue.rowspan > 1) && (label.length == 0)
+      // Reduce venue to the left rowspan by 1 & remove row
