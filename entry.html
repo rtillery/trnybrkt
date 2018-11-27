@@ -201,89 +201,106 @@ $.fn.SelectRange = function(start, end) {
   });
 };
 
-function VirtIdxToRealIdx($tr, virtIdx) {
-  var realIdx = 0;
-  $tr.children('th').each(function (i, th) {
-    if (i < virtIdx)
-      realIdx += parseInt($(th).attr('colspan')) || 1;
-    else
-      return false;
-  });
-  return realIdx;
-}
-
-function RealIdxToVirtIdx($tr, realIdx) {
-  var virtIdx = 0;
-  var chkRealIdx = 0;
-  var th, colspan;
-  while (true) {
-    th = $tr.children('th').eq(virtIdx);
-    colspan = parseInt($(th).attr('colspan')) || 1;
-    chkRealIdx += colspan;
-    if (realIdx < chkRealIdx)
-      break;
-    virtIdx++;
-  }
-  return virtIdx;
-}
-
-function scanTable( $table ) {
+$.fn.scanTable = function() {
   var m = [];
-  $table.children( "tr" ).each( function( y, row ) {
-    $( row ).children( "td, th" ).each( function( x, cell ) {
-      var $cell = $( cell ),
-          cspan = ($cell.attr( "colspan" ) | 0) || 1,
-          rspan = ($cell.attr( "rowspan" ) | 0) || 1;
-      for( ; m[y] && m[y][x]; ++x );
-      for( var tx = x; tx < x + cspan; ++tx ) {
-        for( var ty = y; ty < y + rspan; ++ty ) {
-          if( !m[ty] ) {
+  var pos = undefined;
+  $(this).find('tr').each(function(y, row) {
+    $(row).find('td, th').each(function(x, cell) {
+      var $cell = $(cell),
+          cspan = ($cell.attr('colspan') | 0) || 1,
+          rspan = ($cell.attr('rowspan') | 0) || 1;
+      for(; m[y] && m[y][x]; x++);
+      for(var tx = x; tx < x + cspan; tx++) {
+        for(var ty = y; ty < y + rspan; ty++) {
+          if(!m[ty]) {
             m[ty] = [];
           }
           m[ty][tx] = true;
         }
       }
-      var pos = { left: x, top: y };
-      $cell.data( "cellPos", pos );
-    } );
-  } );
-};
+      pos = { left: x, top: y };
+      $cell.data('cellPos', pos);
+    });
+  });
+  var dims = { width: pos.left + 1, height: pos.top + 1 };
+  $(this).data('dims', pos);
+}
 
-$.fn.cellPos = function( rescan ) {
+$.fn.posFromCell = function(rescan) {
   var $cell = this.first(),
-      pos = $cell.data( "cellPos" );
+      pos = $cell.data('cellPos');
   if( !pos || rescan ) {
-    var $table = $cell.closest( "table, thead, tbody, tfoot" );
-    scanTable( $table );
-    pos = $cell.data( "cellPos" );
+    var $table = $cell.closest('table, thead, tbody, tfoot');
+    $table.scanTable();
+    pos = $cell.data('cellPos');
   }
   return pos;
 }
 
-$.fn.cellFromPos = function(pos) {
-  var $table = this.closest('th').closest('table');
-  var $row = $table.find('tr').eq(pos.top); // assumes a tr for each row
-  var $cell = null;
-  $row.find('th').each(function(i, e) {
-    var cellPos = $(e).data('cellPos');
-    if (cellPos.left >= pos.left && cellPos.top >= pos.top) {
-      $cell = $(e);
+$.fn.$cellFromPos = function(pos) {
+  var $table = this.closest('th, td').closest('table');
+  var $cell = undefined;
+  $table.find('tr').each(function(i, row) {
+    $(row).find('th, td').each(function(i, e) {
+      var cellPos = $(e).data('cellPos');
+      var cspan = ($(e).attr( "colspan" ) | 0) || 1,
+          rspan = ($(e).attr( "rowspan" ) | 0) || 1;
+      if (cellPos.left + cspan > pos.left && cellPos.top + rspan > pos.top) {
+        $cell = $(e);
+        return false;
+      }
+    });
+    if ($cell)
       return false;
-    }
   });
   return $cell;
 }
 
+$.fn.headerType = function() {
+  var pos = this.data('cellPos');
+  var type = undefined;
+  if (pos.top >= 2)
+    switch (pos.left) {
+      case 0: type = 'venue'; break;
+      case 1: type = 'court'; break;
+    }
+  else if (pos.left >= 2)
+    switch (pos.top) {
+      case 0: type = 'date'; break;
+      case 1: type = 'time'; break;
+    }
+  return type;
+}
+
+$.fn.addVenue = function() {}
+$.fn.deleteVenue = function() {}
+$.fn.addCourt = function() {}
+$.fn.deleteCourt = function() {}
+$.fn.addDate = function() {}
+$.fn.deleteDate = function() {}
+$.fn.addTime = function($timecell) {
+  var timepos = $timecell.posFromCell();
+  var datepos = { left: timepos.left, top: timepos.top - 1 };
+  var $table = $timecell.closest('table');
+  var $datecell = $table.$cellFromPos(datepos);
+  var oldcolspan = $datecell.attr('colspan');
+  var newcolspan = oldcolspan + 1;
+  for (var row = 0; row < $table.dims.height; row++) {
+    
+  }
+}
+$.fn.deleteTime = function(cell) {}
+
 $(document).ready(function() {
 
-  scanTable($('event'));
+  $('.event').scanTable();
 
   $('.dynawidth').on('input', function() {
     var paddingAndBorder = $(this).outerWidth() - $(this).width();
     var inputWidth = $(this).GetTextWidth() + paddingAndBorder;
     $(this).css({
       width: inputWidth
-    })
+    });
   }).trigger('input');
 
   $('.dynawidth').keydown(function(e) {
@@ -307,56 +324,69 @@ $(document).ready(function() {
         if (pos <= 0) {
           e.preventDefault();
           // Move to previous header in this row (unless first)
-//          var div = $(document.activeElement).closest('th').prev().children('.dynawidth');
-//          if (div[0]) {
-//            div.focus();
-//            div.SelectRange(div.val().length);
-//          }
-var $thiscell = $(this).closest('th');
-console.log("$thiscell: ", $thiscell);
-var thispos = $thiscell.cellPos();
-console.log("thispos:", thispos);
-var prevpos = { left: thispos.left - 1, top: thispos.top };
-console.log("prevpos:", prevpos);
-if (prevpos.left < 0)
-  prevpos.left = 0;
-var $prevcell = $(this).cellFromPos(prevpos);
-console.log("$prevcell: ", $prevcell);
-var $previn = $($prevcell.children('.dynawidth')[0]);
-console.log("$previn: ", $previn);
-if ($previn.length) {
-  console.log("HERE!!");
-  $previn.focus();
-  $previn.SelectRange($previn.val().length);
-}
+          var thispos = $(this).closest('th').posFromCell();
+          var newpos = { left: thispos.left - 1, top: thispos.top };
+          if (newpos.left >= 0) {
+            var $newcell = $(this).$cellFromPos(newpos);
+            if ($newcell) {
+              var $newin = $($newcell.find('.dynawidth')[0]);
+              if ($newin.length) {
+                $newin.focus();
+                $newin.SelectRange($newin.val().length);
+              }
+            }
+          }
         }
         break;
       case 38: // [↑] (up arrow)
         e.preventDefault();
         // Move to previous header row (unless first)
-        var thisth = $(this).closest('th');
-        var thistr = $(this).closest('tr');
-        var prevtr = thistr.prev('tr');
-        var newidx = RealIdxToVirtIdx(prevtr, VirtIdxToRealIdx(thistr, thisth.index()));
-        if (prevtr.length)
-          prevtr.children('th').eq(newidx).children('.dynawidth').focus();
+        var thispos = $(this).closest('th').posFromCell();
+        var newpos = { left: thispos.left, top: thispos.top - 1 };
+        if (newpos.left >= 0) {
+          var $newcell = $(this).$cellFromPos(newpos);
+          if ($newcell) {
+            var $newin = $($newcell.find('.dynawidth')[0]);
+            if ($newin.length) {
+              $newin.focus();
+              $newin.SelectRange(0 /* $newin.val().length */);
+            }
+          }
+        }
         break;
       case 39: // [→] (right arrow)
         if (pos >= text.length) {
           e.preventDefault();
           // Move to next header in this row (unless last)
-          $(document.activeElement).closest('th').next().children('.dynawidth').focus();
+          var $thiscell = $(this).closest('th');
+          var thispos = $thiscell.posFromCell();
+          var cspan = ($thiscell.attr( "colspan" ) | 0) || 1;
+          var newpos = { left: thispos.left + cspan, top: thispos.top };
+          var $newcell = $(this).$cellFromPos(newpos);
+          if ($newcell) {
+            var $newin = $($newcell.find('.dynawidth')[0]);
+            if ($newin.length) {
+              $newin.focus();
+              $newin.SelectRange(0);
+            }
+          }
         }
         break;
       case 40: // [↓] (down arrow)
         e.preventDefault();
         // Move to next header row (unless last)
-        var thisth = $(this).closest('th');
-        var thistr = $(this).closest('tr');
-        var nexttr = thistr.next('tr');
-        var newidx = RealIdxToVirtIdx(nexttr, VirtIdxToRealIdx(thistr, thisth.index()));
-        if (nexttr.length)
-          nexttr.children('th').eq(newidx).children('.dynawidth').focus();
+        var $thiscell = $(this).closest('th');
+        var thispos = $thiscell.posFromCell();
+        var rspan = ($thiscell.attr( "rowspan" ) | 0) || 1;
+        var newpos = { left: thispos.left, top: thispos.top + rspan };
+        var $newcell = $(this).$cellFromPos(newpos);
+        if ($newcell) {
+          var $newin = $($newcell.find('.dynawidth')[0]);
+          if ($newin.length) {
+            $newin.focus();
+            $newin.SelectRange(0 /* $newin.val().length */);
+          }
+        }
         break;
       case 46: // [Delete]
         if (text.length <= 0) {
@@ -382,7 +412,6 @@ if ($previn.length) {
         break;
     }
   });
-
 });
 
 // dates/times
