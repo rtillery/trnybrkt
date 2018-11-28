@@ -223,7 +223,7 @@ $.fn.scanTable = function() {
     });
   });
   var dims = { width: pos.left + 1, height: pos.top + 1 };
-  $(this).data('dims', pos);
+  $(this).data('dims', dims);
 }
 
 $.fn.posFromCell = function(rescan) {
@@ -245,7 +245,7 @@ $.fn.$cellFromPos = function(pos) {
       var cellPos = $(e).data('cellPos');
       var cspan = ($(e).attr( "colspan" ) | 0) || 1,
           rspan = ($(e).attr( "rowspan" ) | 0) || 1;
-      if (cellPos.left + cspan > pos.left && cellPos.top + rspan > pos.top) {
+      if (cellPos && (cellPos.left + cspan > pos.left) && (cellPos.top + rspan > pos.top)) {
         $cell = $(e);
         return false;
       }
@@ -271,7 +271,7 @@ $.fn.headerType = function() {
     }
   return type;
 }
-
+/*
 $.fn.addVenue = function() {}
 $.fn.deleteVenue = function() {}
 $.fn.addCourt = function() {}
@@ -290,7 +290,7 @@ $.fn.addTime = function($timecell) {
   }
 }
 $.fn.deleteTime = function(cell) {}
-
+*/
 $(document).ready(function() {
 
   $('.event').scanTable();
@@ -397,18 +397,55 @@ $(document).ready(function() {
     }
   });
   $('.dynawidth').keyup(function(e) {
-    console.log(e);
+console.log(e);
     var key = e.which;
     var text = $(this).val();
-    var pos = this.selectionStart;
-    console.log(`text: ${text}`);
-    console.log(`text length: ${text.length}`);
-    console.log(`char: ${e.which}`);
-    console.log(`cursor: ${pos}`);
+    var curpos = this.selectionStart;
+    var $thiscell = $(this).closest('th');
+    var cellpos = $thiscell.data('cellPos');
+    var $table = $thiscell.closest('table');
+console.log(`text: ${text}`);
+console.log(`text length: ${text.length}`);
+console.log(`char: ${e.which}`);
+console.log(`cursor: ${curpos}`);
+console.log("cellpos:", cellpos);
+console.log("$table:", $table);
     switch (key) {
       case 13: // [Enter]
         e.preventDefault();
         // Create a new header in this row/column
+        if (curpos == text.length) {
+          if (cellpos.left > 1) {
+            if (cellpos.top == 0) {
+              // DATE
+              // Add new column to the right
+              var cspan = ($thiscell.attr( "colspan" ) | 0) || 1;
+console.log("cspan:", cspan);
+              // Add new Date header
+              var coords = { left: cellpos.left + cspan - 1, top: 0 };
+console.log("coords:", coords);
+              var $datecell = $(this).$cellFromPos(coords);
+              $datecell.after("<th><input type='text' class='dynawidth' placeholder='Date'></th>");
+              // Add new Time header
+              coords.top += 1;
+              var $timecell = $(this).$cellFromPos(coords);
+              $timecell.after("<th><input type='text' class='dynawidth' placeholder='Time'></th>");
+              // Add remaining rows of check buttons
+              var dims = $table.data('dims');
+console.log("dims:", dims);
+              var tableheight = dims.height;
+              for (var row = coords.top + 1; row < tableheight; row++) {
+                coords.top = row;
+                var $cell = $table.$cellFromPos(coords);
+                $cell.after("<td><input type='checkbox' checked></td>")
+              }
+console.log("SCANNING TABLE");
+              $table.scanTable();
+            } else if (cellpos.top == 1) {
+
+            }
+          }
+        }
         break;
     }
   });
