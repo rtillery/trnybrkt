@@ -238,7 +238,7 @@ $.fn.posFromCell = function(rescan) {
 }
 
 $.fn.$cellFromPos = function(pos) {
-  var $table = this.closest('th, td').closest('table');
+  var $table = $(this).closest('table');
   var $cell = undefined;
   $table.find('tr').each(function(i, row) {
     $(row).find('th, td').each(function(i, e) {
@@ -271,26 +271,7 @@ $.fn.headerType = function() {
     }
   return type;
 }
-/*
-$.fn.addVenue = function() {}
-$.fn.deleteVenue = function() {}
-$.fn.addCourt = function() {}
-$.fn.deleteCourt = function() {}
-$.fn.addDate = function() {}
-$.fn.deleteDate = function() {}
-$.fn.addTime = function($timecell) {
-  var timepos = $timecell.posFromCell();
-  var datepos = { left: timepos.left, top: timepos.top - 1 };
-  var $table = $timecell.closest('table');
-  var $datecell = $table.$cellFromPos(datepos);
-  var oldcolspan = $datecell.attr('colspan');
-  var newcolspan = oldcolspan + 1;
-  for (var row = 0; row < $table.dims.height; row++) {
-    
-  }
-}
-$.fn.deleteTime = function(cell) {}
-*/
+
 function OnDynaWidthInput() {
   var paddingAndBorder = $(this).outerWidth() - $(this).width();
   var inputWidth = $(this).GetTextWidth() + paddingAndBorder;
@@ -393,6 +374,73 @@ function OnDynaWidthKeyDown(e) {
   }
 }
 
+$.fn.AddDynaWidthEventHandlers = function() {
+  $dynawidth = $(this).find('.dynawidth');
+  $dynawidth.on('input', OnDynaWidthInput).trigger('input');
+  $dynawidth.keydown(OnDynaWidthKeyDown);
+  $dynawidth.keyup(OnDynaWidthKeyUp);
+}
+
+function InsertRendezvousCell() {
+
+}
+function InsertRendezvousColumn() {
+
+}
+$.fn.InsertTimeColumn = function(cellpos) {
+  var $thiscell = this;
+  var $table = $thiscell.closest('table');
+  // Extend Date header above
+  var datecoords = { left: cellpos.left, top: 0 };
+  var $datecell = $table.$cellFromPos(datecoords);
+  var cspan = ($datecell.attr( "colspan" ) | 0) || 1;
+  cspan++;
+  $datecell.attr('colspan', cspan);
+  // Add new column to the right
+  var coords = { left: cellpos.left, top: 1 };
+  // Add new Time header
+  var $timecell = $(this).$cellFromPos(coords);
+  $("<th><input type='text' class='dynawidth' placeholder='Time'></th>").insertAfter($timecell).AddDynaWidthEventHandlers();
+  // Add remaining rows of check buttons
+  var dims = $table.data('dims');
+console.log("dims:", dims);
+  var tableheight = dims.height;
+  for (var row = coords.top + 1; row < tableheight; row++) {
+    coords.top = row;
+    var $cell = $table.$cellFromPos(coords);
+    $cell.after("<td><input type='checkbox' checked></td>")
+  }
+console.log("SCANNING TABLE");
+  $table.scanTable();
+}
+$.fn.InsertDateColumn = function(cellpos) {
+  // Add new column to the right
+  var $thiscell = this;
+  var $table = $thiscell.closest('table');
+  var cspan = ($thiscell.attr( "colspan" ) | 0) || 1;
+console.log("cspan:", cspan);
+  // Add new Date header
+  var coords = { left: cellpos.left + cspan - 1, top: 0 };
+console.log("coords:", coords);
+  var $datecell = $(this).$cellFromPos(coords);
+  $("<th><input type='text' class='dynawidth' placeholder='Date'></th>").insertAfter($datecell).AddDynaWidthEventHandlers();
+  // Add new Time header
+  coords.top += 1;
+  var $timecell = $(this).$cellFromPos(coords);
+  $("<th><input type='text' class='dynawidth' placeholder='Time'></th>").insertAfter($timecell).AddDynaWidthEventHandlers();
+  // Add remaining rows of check buttons
+  var dims = $table.data('dims');
+console.log("dims:", dims);
+  var tableheight = dims.height;
+  for (var row = coords.top + 1; row < tableheight; row++) {
+    coords.top = row;
+    var $cell = $table.$cellFromPos(coords);
+    $cell.after("<td><input type='checkbox' checked></td>")
+  }
+console.log("SCANNING TABLE");
+  $table.scanTable();
+}
+
 function OnDynaWidthKeyUp(e) {
 console.log(e);
   var key = e.which;
@@ -400,13 +448,11 @@ console.log(e);
   var curpos = this.selectionStart;
   var $thiscell = $(this).closest('th');
   var cellpos = $thiscell.data('cellPos');
-  var $table = $thiscell.closest('table');
 console.log(`text: ${text}`);
 console.log(`text length: ${text.length}`);
 console.log(`char: ${e.which}`);
 console.log(`cursor: ${curpos}`);
 console.log("cellpos:", cellpos);
-console.log("$table:", $table);
   switch (key) {
     case 13: // [Enter]
       e.preventDefault();
@@ -414,36 +460,9 @@ console.log("$table:", $table);
       if (curpos == text.length) {
         if (cellpos.left > 1) {
           if (cellpos.top == 0) {
-            // DATE
-            // Add new column to the right
-            var cspan = ($thiscell.attr( "colspan" ) | 0) || 1;
-console.log("cspan:", cspan);
-            // Add new Date header
-            var coords = { left: cellpos.left + cspan - 1, top: 0 };
-console.log("coords:", coords);
-            var $datecell = $(this).$cellFromPos(coords);
-            $datecell.after("<th><input type='text' class='dynawidth' placeholder='Date'></th>");
-            // Add new Time header
-            coords.top += 1;
-            var $timecell = $(this).$cellFromPos(coords);
-            $timecell.after("<th><input type='text' class='dynawidth' placeholder='Time'></th>");
-            // Add remaining rows of check buttons
-            var dims = $table.data('dims');
-console.log("dims:", dims);
-            var tableheight = dims.height;
-            for (var row = coords.top + 1; row < tableheight; row++) {
-              coords.top = row;
-              var $cell = $table.$cellFromPos(coords);
-              $cell.after("<td><input type='checkbox' checked></td>")
-            }
-console.log("SCANNING TABLE");
-            $table.scanTable();
-$('.dynawidth').on('input', OnDynaWidthInput).trigger('input');
-$('.dynawidth').keydown(OnDynaWidthKeyDown);
-$('.dynawidth').keyup(OnDynaWidthKeyUp);
-
+$thiscell.InsertDateColumn(cellpos);
           } else if (cellpos.top == 1) {
-
+$thiscell.InsertTimeColumn(cellpos);
           }
         }
       }
