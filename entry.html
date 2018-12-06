@@ -381,62 +381,55 @@ $.fn.AddDynaWidthEventHandlers = function() {
   $dynawidth.keyup(OnDynaWidthKeyUp);
 }
 
-function InsertRendezvousCell() {
-
+$.fn.InsertRendezvousColumn = function(left) {
+  var $table = this;
+  var dims = $table.data('dims');
+  var tableheight = dims.height;
+  for (var coords = { left: left, top: 2 }; coords.top < tableheight; coords.top++) {
+    var $cell = $table.$cellFromPos(coords);
+    $cell.after("<td><input type='checkbox' checked></td>")
+  }
 }
-function InsertRendezvousColumn() {
-
-}
-$.fn.InsertTimeColumn = function(cellpos) {
+$.fn.InsertTimeColumn = function(left, $table) {
   var $thiscell = this;
-  var $table = $thiscell.closest('table');
   // Extend Date header above
-  var datecoords = { left: cellpos.left, top: 0 };
+  var datecoords = { left: left, top: 0 };
   var $datecell = $table.$cellFromPos(datecoords);
   var cspan = ($datecell.attr( "colspan" ) | 0) || 1;
   cspan++;
   $datecell.attr('colspan', cspan);
   // Add new column to the right
-  var coords = { left: cellpos.left, top: 1 };
+  var coords = { left: left, top: 1 };
   // Add new Time header
   var $timecell = $(this).$cellFromPos(coords);
-  $("<th><input type='text' class='dynawidth' placeholder='Time'></th>").insertAfter($timecell).AddDynaWidthEventHandlers();
+  $("<th><input type='text' class='dynawidth' placeholder='Time'></th>")
+    .insertAfter($timecell)
+    .AddDynaWidthEventHandlers();
   // Add remaining rows of check buttons
-  var dims = $table.data('dims');
-console.log("dims:", dims);
-  var tableheight = dims.height;
-  for (var row = coords.top + 1; row < tableheight; row++) {
-    coords.top = row;
-    var $cell = $table.$cellFromPos(coords);
-    $cell.after("<td><input type='checkbox' checked></td>")
-  }
+  $table.InsertRendezvousColumn(left);
 console.log("SCANNING TABLE");
   $table.scanTable();
 }
-$.fn.InsertDateColumn = function(cellpos) {
+$.fn.InsertDateColumn = function(left, $table) {
   // Add new column to the right
   var $thiscell = this;
-  var $table = $thiscell.closest('table');
   var cspan = ($thiscell.attr( "colspan" ) | 0) || 1;
 console.log("cspan:", cspan);
   // Add new Date header
-  var coords = { left: cellpos.left + cspan - 1, top: 0 };
+  var coords = { left: left + cspan - 1, top: 0 };
 console.log("coords:", coords);
   var $datecell = $(this).$cellFromPos(coords);
-  $("<th><input type='text' class='dynawidth' placeholder='Date'></th>").insertAfter($datecell).AddDynaWidthEventHandlers();
+  $("<th><input type='text' class='dynawidth' placeholder='Date'></th>")
+    .insertAfter($datecell)
+    .AddDynaWidthEventHandlers();
   // Add new Time header
   coords.top += 1;
   var $timecell = $(this).$cellFromPos(coords);
-  $("<th><input type='text' class='dynawidth' placeholder='Time'></th>").insertAfter($timecell).AddDynaWidthEventHandlers();
+  $("<th><input type='text' class='dynawidth' placeholder='Time'></th>")
+    .insertAfter($timecell)
+    .AddDynaWidthEventHandlers();
   // Add remaining rows of check buttons
-  var dims = $table.data('dims');
-console.log("dims:", dims);
-  var tableheight = dims.height;
-  for (var row = coords.top + 1; row < tableheight; row++) {
-    coords.top = row;
-    var $cell = $table.$cellFromPos(coords);
-    $cell.after("<td><input type='checkbox' checked></td>")
-  }
+  $table.InsertRendezvousColumn(left);
 console.log("SCANNING TABLE");
   $table.scanTable();
 }
@@ -448,11 +441,13 @@ console.log(e);
   var curpos = this.selectionStart;
   var $thiscell = $(this).closest('th');
   var cellpos = $thiscell.data('cellPos');
+  var $table = $thiscell.closest('table');
 console.log(`text: ${text}`);
 console.log(`text length: ${text.length}`);
 console.log(`char: ${e.which}`);
 console.log(`cursor: ${curpos}`);
 console.log("cellpos:", cellpos);
+console.log("$table:", $table);
   switch (key) {
     case 13: // [Enter]
       e.preventDefault();
@@ -460,9 +455,9 @@ console.log("cellpos:", cellpos);
       if (curpos == text.length) {
         if (cellpos.left > 1) {
           if (cellpos.top == 0) {
-$thiscell.InsertDateColumn(cellpos);
+$thiscell.InsertDateColumn(cellpos.left, $table);
           } else if (cellpos.top == 1) {
-$thiscell.InsertTimeColumn(cellpos);
+$thiscell.InsertTimeColumn(cellpos.left, $table);
           }
         }
       }
