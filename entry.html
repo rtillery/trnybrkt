@@ -391,47 +391,38 @@ console.log(this);
     $cell.after("<td><input type='checkbox' checked></td>")
   }
 }
-$.fn.InsertTimeColumn = function(left) {
+$.fn.FinishInsertingTimeColumn = function(coords) {
   var $table = this;
-  // Extend Date header above
-  var datecoords = { left: left, top: 0 };
-  var $datecell = $table.$cellFromPos(datecoords);
-  var cspan = ($datecell.attr( "colspan" ) | 0) || 1;
-  cspan++;
-  $datecell.attr('colspan', cspan);
-  // Add new column to the right
-  var coords = { left: left, top: 1 };
-  // Add new Time header
   var $timecell = $(this).$cellFromPos(coords);
   $("<th><input type='text' class='dynawidth' placeholder='Time'></th>")
     .insertAfter($timecell)
     .AddDynaWidthEventHandlers();
   // Add remaining rows of check buttons
-  $table.InsertRendezvousColumn(left);
+  $table.InsertRendezvousColumn(coords.left);
 console.log("SCANNING TABLE");
   $table.scanTable();
 }
-$.fn.InsertDateColumn = function(left) {
-  // Add new column to the right
+$.fn.InsertTimeColumn = function(left) {
   var $table = this;
-  var coords = { left: left, top: 0 };
-  var $datecell = $(this).$cellFromPos(coords);
-  var cspan = ($datecell.attr( "colspan" ) | 0) || 1;
-console.log("cspan:", cspan);
+  // Extend Date header above
+  var $datecell = $table.$cellFromPos({ left: left, top: 0 });
+  var cspan = ($datecell.attr('colspan') | 0) || 1;
+  $datecell.attr('colspan', cspan + 1);
+  // Add new column to the right
+  // Add new Time header
+  $table.FinishInsertingTimeColumn({ left: left, top: 1 });
+}
+$.fn.InsertDateColumn = function(left) {
+  var $table = this;
+  // Add new column to the right
+  var $datecell = $(this).$cellFromPos({ left: left, top: 0 });
+  var cspan = ($datecell.attr('colspan') | 0) || 1;
   // Add new Date header
   $("<th><input type='text' class='dynawidth' placeholder='Date'></th>")
     .insertAfter($datecell)
     .AddDynaWidthEventHandlers();
   // Add new Time header
-  coords = { left: left + cspan - 1, top: 1 };
-  var $timecell = $(this).$cellFromPos(coords);
-  $("<th><input type='text' class='dynawidth' placeholder='Time'></th>")
-    .insertAfter($timecell)
-    .AddDynaWidthEventHandlers();
-  // Add remaining rows of check buttons
-  $table.InsertRendezvousColumn(left);
-console.log("SCANNING TABLE");
-  $table.scanTable();
+  $table.FinishInsertingTimeColumn({ left: left + cspan - 1, top: 1 });
 }
 
 function OnDynaWidthKeyUp(e) {
