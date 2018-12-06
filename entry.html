@@ -291,94 +291,55 @@ $.fn.addTime = function($timecell) {
 }
 $.fn.deleteTime = function(cell) {}
 */
-$(document).ready(function() {
+function OnDynaWidthInput() {
+  var paddingAndBorder = $(this).outerWidth() - $(this).width();
+  var inputWidth = $(this).GetTextWidth() + paddingAndBorder;
+  $(this).css({
+    width: inputWidth
+  });
+}
 
-  $('.event').scanTable();
-
-  $('.dynawidth').on('input', function() {
-    var paddingAndBorder = $(this).outerWidth() - $(this).width();
-    var inputWidth = $(this).GetTextWidth() + paddingAndBorder;
-    $(this).css({
-      width: inputWidth
-    });
-  }).trigger('input');
-
-  $('.dynawidth').keydown(function(e) {
-    var key = e.which;
-    var text = $(this).val();
-    var pos = this.selectionStart;
-    switch (key) {
-      case 8: // [Backspace]
-        if (text.length <= 0) {
-          e.preventDefault();
-          // Delete this header (unless only in this row) and move to previous in this row (unless first)
-        }
-        break;
-      // case 9: // [Tab]
-      //   // Move to next header in this row (unless last)
-      //   break;
-      // case 16: // [Shift]+[Tab]
-      //   // Move to previous header in this row (unless first)
-      //   break;
-      case 37: // [←] (left arrow)
-        if (pos <= 0) {
-          e.preventDefault();
-          // Move to previous header in this row (unless first)
-          var thispos = $(this).closest('th').posFromCell();
-          var newpos = { left: thispos.left - 1, top: thispos.top };
-          if (newpos.left >= 0) {
-            var $newcell = $(this).$cellFromPos(newpos);
-            if ($newcell) {
-              var $newin = $($newcell.find('.dynawidth')[0]);
-              if ($newin.length) {
-                $newin.focus();
-                $newin.SelectRange($newin.val().length);
-              }
-            }
-          }
-        }
-        break;
-      case 38: // [↑] (up arrow)
+function OnDynaWidthKeyDown(e) {
+  var key = e.which;
+  var text = $(this).val();
+  var pos = this.selectionStart;
+  switch (key) {
+    case 8: // [Backspace]
+      if (text.length <= 0) {
         e.preventDefault();
-        // Move to previous header row (unless first)
+        // Delete this header (unless only in this row) and move to previous in this row (unless first)
+      }
+      break;
+    // case 9: // [Tab]
+    //   // Move to next header in this row (unless last)
+    //   break;
+    // case 16: // [Shift]+[Tab]
+    //   // Move to previous header in this row (unless first)
+    //   break;
+    case 37: // [←] (left arrow)
+      if (pos <= 0) {
+        e.preventDefault();
+        // Move to previous header in this row (unless first)
         var thispos = $(this).closest('th').posFromCell();
-        var newpos = { left: thispos.left, top: thispos.top - 1 };
+        var newpos = { left: thispos.left - 1, top: thispos.top };
         if (newpos.left >= 0) {
           var $newcell = $(this).$cellFromPos(newpos);
           if ($newcell) {
             var $newin = $($newcell.find('.dynawidth')[0]);
             if ($newin.length) {
               $newin.focus();
-              $newin.SelectRange(0 /* $newin.val().length */);
+              $newin.SelectRange($newin.val().length);
             }
           }
         }
-        break;
-      case 39: // [→] (right arrow)
-        if (pos >= text.length) {
-          e.preventDefault();
-          // Move to next header in this row (unless last)
-          var $thiscell = $(this).closest('th');
-          var thispos = $thiscell.posFromCell();
-          var cspan = ($thiscell.attr( "colspan" ) | 0) || 1;
-          var newpos = { left: thispos.left + cspan, top: thispos.top };
-          var $newcell = $(this).$cellFromPos(newpos);
-          if ($newcell) {
-            var $newin = $($newcell.find('.dynawidth')[0]);
-            if ($newin.length) {
-              $newin.focus();
-              $newin.SelectRange(0);
-            }
-          }
-        }
-        break;
-      case 40: // [↓] (down arrow)
-        e.preventDefault();
-        // Move to next header row (unless last)
-        var $thiscell = $(this).closest('th');
-        var thispos = $thiscell.posFromCell();
-        var rspan = ($thiscell.attr( "rowspan" ) | 0) || 1;
-        var newpos = { left: thispos.left, top: thispos.top + rspan };
+      }
+      break;
+    case 38: // [↑] (up arrow)
+      e.preventDefault();
+      // Move to previous header row (unless first)
+      var thispos = $(this).closest('th').posFromCell();
+      var newpos = { left: thispos.left, top: thispos.top - 1 };
+      if (newpos.left >= 0) {
         var $newcell = $(this).$cellFromPos(newpos);
         if ($newcell) {
           var $newin = $($newcell.find('.dynawidth')[0]);
@@ -387,68 +348,116 @@ $(document).ready(function() {
             $newin.SelectRange(0 /* $newin.val().length */);
           }
         }
-        break;
-      case 46: // [Delete]
-        if (text.length <= 0) {
-          e.preventDefault();
-          // Delete this header (unless only in this row) and move to next in this row (unless last)
+      }
+      break;
+    case 39: // [→] (right arrow)
+      if (pos >= text.length) {
+        e.preventDefault();
+        // Move to next header in this row (unless last)
+        var $thiscell = $(this).closest('th');
+        var thispos = $thiscell.posFromCell();
+        var cspan = ($thiscell.attr( "colspan" ) | 0) || 1;
+        var newpos = { left: thispos.left + cspan, top: thispos.top };
+        var $newcell = $(this).$cellFromPos(newpos);
+        if ($newcell) {
+          var $newin = $($newcell.find('.dynawidth')[0]);
+          if ($newin.length) {
+            $newin.focus();
+            $newin.SelectRange(0);
+          }
         }
-        break;
-    }
-  });
-  $('.dynawidth').keyup(function(e) {
+      }
+      break;
+    case 40: // [↓] (down arrow)
+      e.preventDefault();
+      // Move to next header row (unless last)
+      var $thiscell = $(this).closest('th');
+      var thispos = $thiscell.posFromCell();
+      var rspan = ($thiscell.attr( "rowspan" ) | 0) || 1;
+      var newpos = { left: thispos.left, top: thispos.top + rspan };
+      var $newcell = $(this).$cellFromPos(newpos);
+      if ($newcell) {
+        var $newin = $($newcell.find('.dynawidth')[0]);
+        if ($newin.length) {
+          $newin.focus();
+          $newin.SelectRange(0 /* $newin.val().length */);
+        }
+      }
+      break;
+    case 46: // [Delete]
+      if (text.length <= 0) {
+        e.preventDefault();
+        // Delete this header (unless only in this row) and move to next in this row (unless last)
+      }
+      break;
+  }
+}
+
+function OnDynaWidthKeyUp(e) {
 console.log(e);
-    var key = e.which;
-    var text = $(this).val();
-    var curpos = this.selectionStart;
-    var $thiscell = $(this).closest('th');
-    var cellpos = $thiscell.data('cellPos');
-    var $table = $thiscell.closest('table');
+  var key = e.which;
+  var text = $(this).val();
+  var curpos = this.selectionStart;
+  var $thiscell = $(this).closest('th');
+  var cellpos = $thiscell.data('cellPos');
+  var $table = $thiscell.closest('table');
 console.log(`text: ${text}`);
 console.log(`text length: ${text.length}`);
 console.log(`char: ${e.which}`);
 console.log(`cursor: ${curpos}`);
 console.log("cellpos:", cellpos);
 console.log("$table:", $table);
-    switch (key) {
-      case 13: // [Enter]
-        e.preventDefault();
-        // Create a new header in this row/column
-        if (curpos == text.length) {
-          if (cellpos.left > 1) {
-            if (cellpos.top == 0) {
-              // DATE
-              // Add new column to the right
-              var cspan = ($thiscell.attr( "colspan" ) | 0) || 1;
+  switch (key) {
+    case 13: // [Enter]
+      e.preventDefault();
+      // Create a new header in this row/column
+      if (curpos == text.length) {
+        if (cellpos.left > 1) {
+          if (cellpos.top == 0) {
+            // DATE
+            // Add new column to the right
+            var cspan = ($thiscell.attr( "colspan" ) | 0) || 1;
 console.log("cspan:", cspan);
-              // Add new Date header
-              var coords = { left: cellpos.left + cspan - 1, top: 0 };
+            // Add new Date header
+            var coords = { left: cellpos.left + cspan - 1, top: 0 };
 console.log("coords:", coords);
-              var $datecell = $(this).$cellFromPos(coords);
-              $datecell.after("<th><input type='text' class='dynawidth' placeholder='Date'></th>");
-              // Add new Time header
-              coords.top += 1;
-              var $timecell = $(this).$cellFromPos(coords);
-              $timecell.after("<th><input type='text' class='dynawidth' placeholder='Time'></th>");
-              // Add remaining rows of check buttons
-              var dims = $table.data('dims');
+            var $datecell = $(this).$cellFromPos(coords);
+            $datecell.after("<th><input type='text' class='dynawidth' placeholder='Date'></th>");
+            // Add new Time header
+            coords.top += 1;
+            var $timecell = $(this).$cellFromPos(coords);
+            $timecell.after("<th><input type='text' class='dynawidth' placeholder='Time'></th>");
+            // Add remaining rows of check buttons
+            var dims = $table.data('dims');
 console.log("dims:", dims);
-              var tableheight = dims.height;
-              for (var row = coords.top + 1; row < tableheight; row++) {
-                coords.top = row;
-                var $cell = $table.$cellFromPos(coords);
-                $cell.after("<td><input type='checkbox' checked></td>")
-              }
-console.log("SCANNING TABLE");
-              $table.scanTable();
-            } else if (cellpos.top == 1) {
-
+            var tableheight = dims.height;
+            for (var row = coords.top + 1; row < tableheight; row++) {
+              coords.top = row;
+              var $cell = $table.$cellFromPos(coords);
+              $cell.after("<td><input type='checkbox' checked></td>")
             }
+console.log("SCANNING TABLE");
+            $table.scanTable();
+$('.dynawidth').on('input', OnDynaWidthInput).trigger('input');
+$('.dynawidth').keydown(OnDynaWidthKeyDown);
+$('.dynawidth').keyup(OnDynaWidthKeyUp);
+
+          } else if (cellpos.top == 1) {
+
           }
         }
-        break;
-    }
-  });
+      }
+      break;
+  }
+}
+
+$(document).ready(function() {
+  $('.event').scanTable();
+
+  $('.dynawidth').on('input', OnDynaWidthInput).trigger('input');
+
+  $('.dynawidth').keydown(OnDynaWidthKeyDown);
+  $('.dynawidth').keyup(OnDynaWidthKeyUp);
 });
 
 // dates/times
