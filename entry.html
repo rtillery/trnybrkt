@@ -376,6 +376,8 @@ function OnDynaWidthKeyDown(e) {
 
 DATEHEADER = "<th><input type='text' class='dynawidth' placeholder='Date'></th>";
 TIMEHEADER = "<th><input type='text' class='dynawidth' placeholder='Time'></th>";
+VENUEHEADER = "<th><input type='text' class='dynawidth' placeholder='Venue'></th>";
+COURTHEADER = "<th><input type='text' class='dynawidth' placeholder='Court'></th>";
 RENDEZVOUS = "<td><input type='checkbox' checked></td>";
 
 $.fn.AddDynaWidthEventHandlers = function() {
@@ -429,7 +431,22 @@ $.fn.InsertDateColumn = function(left) {
 
 $.fn.InsertVenueRow = function(top) {
   var $table = this;
-
+  var $venuecell = $table.$cellFromPos({ left: 0, top: top });
+  var rspan = ($venuecell.attr('rowspan') | 0) || 1;
+  var $row = $venuecell.closest('tr');
+  while(--rspan) {
+    $row = $row.next();
+  }
+  var dims = $table.data('dims');
+  var newrow = "<tr>" + VENUEHEADER + COURTHEADER;
+  for(var col = 2; col < dims.width; col++) {
+    newrow += RENDEZVOUS;
+  }
+  newrow += "</tr>";
+  console.log(newrow);
+  $row.after(newrow);
+  console.log($row.find('th'));
+  $row.find('th').AddDynaWidthEventHandlers();
 }
 
 function OnDynaWidthKeyUp(e) {
