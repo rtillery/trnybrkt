@@ -374,6 +374,10 @@ function OnDynaWidthKeyDown(e) {
   }
 }
 
+DATEHEADER = "<th><input type='text' class='dynawidth' placeholder='Date'></th>";
+TIMEHEADER = "<th><input type='text' class='dynawidth' placeholder='Time'></th>";
+RENDEZVOUS = "<td><input type='checkbox' checked></td>";
+
 $.fn.AddDynaWidthEventHandlers = function() {
   $dynawidth = $(this).find('.dynawidth');
   $dynawidth.on('input', OnDynaWidthInput).trigger('input');
@@ -388,13 +392,13 @@ console.log(this);
   var tableheight = dims.height;
   for (var coords = { left: left, top: 2 }; coords.top < tableheight; coords.top++) {
     var $cell = $table.$cellFromPos(coords);
-    $cell.after("<td><input type='checkbox' checked></td>")
+    $cell.after(RENDEZVOUS);
   }
 }
 $.fn.FinishInsertingTimeColumn = function(coords) {
   var $table = this;
   var $timecell = $(this).$cellFromPos(coords);
-  $("<th><input type='text' class='dynawidth' placeholder='Time'></th>")
+  $(TIMEHEADER)
     .insertAfter($timecell)
     .AddDynaWidthEventHandlers();
   // Add remaining rows of check buttons
@@ -418,7 +422,7 @@ $.fn.InsertDateColumn = function(left) {
   var $datecell = $(this).$cellFromPos({ left: left, top: 0 });
   var cspan = ($datecell.attr('colspan') | 0) || 1;
   // Add new Date header
-  $("<th><input type='text' class='dynawidth' placeholder='Date'></th>")
+  $(DATEHEADER)
     .insertAfter($datecell)
     .AddDynaWidthEventHandlers();
   // Add new Time header
@@ -506,20 +510,6 @@ $(document).ready(function() {
         <td><input type='number' min='3' max='4' value='3' disabled></td>
       </tr>
       <tr>
-        <td class='label'>Locations:</td>
-        <td><textarea name="locations" cols="40" rows="6" onchange='onLocationChange()'></textarea></td>
-      </tr>
-      <tr>
-        <td class='label'>Times:</td>
-        <td><textarea name="times" cols="10" rows="2" onchange='onTimeChange()'>8:00 AM&NewLine;3:00 PM</textarea></td>
-      </tr>
-      <tr><td colspan='2'>
-        <table class='matrix'>
-          <thead></thead>
-          <tbody></tbody>
-        </table>
-      </td></tr>
-      <tr>
         <td class='label'>Paste Team List Here:</td>
         <td><textarea name='excel_data' cols='20' rows='1' onchange='onExcelPaste()'></textarea></td>
       </tr>
@@ -536,6 +526,13 @@ $(document).ready(function() {
             <tr><th rowspan='2'><input type='text' class='dynawidth' value='Venue 2'></th><th><input type='text' class='dynawidth' value='Court 1'></th><td><input type='checkbox' checked></td><td><input type='checkbox' checked></td><td><input type='checkbox' checked></td><td><input type='checkbox' checked></tr>
             <tr><th><input type='text' class='dynawidth' value='Court 2'></th><td><input type='checkbox' checked></td><td><input type='checkbox' checked></td><td><input type='checkbox' checked></td><td><input type='checkbox' checked></tr>
           </tbody>
+        </table>
+      </td></tr>
+
+      <tr><td colspan='2'>
+        <table class='matrix'>
+          <thead></thead>
+          <tbody></tbody>
         </table>
       </td></tr>
 
