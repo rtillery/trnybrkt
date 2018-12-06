@@ -386,23 +386,21 @@ $.fn.AddDynaWidthEventHandlers = function() {
 }
 
 $.fn.InsertRendezvousColumn = function(left) {
-console.log(this);
   var $table = this;
   var dims = $table.data('dims');
-  var tableheight = dims.height;
-  for (var coords = { left: left, top: 2 }; coords.top < tableheight; coords.top++) {
+  for (var coords = { left: left, top: 2 }; coords.top < dims.height; coords.top++) {
     var $cell = $table.$cellFromPos(coords);
     $cell.after(RENDEZVOUS);
   }
 }
-$.fn.FinishInsertingTimeColumn = function(coords) {
+$.fn.FinishInsertingTimeColumn = function(left) {
   var $table = this;
-  var $timecell = $(this).$cellFromPos(coords);
+  var $timecell = $(this).$cellFromPos({ left: left, top: 1 });
   $(TIMEHEADER)
     .insertAfter($timecell)
     .AddDynaWidthEventHandlers();
   // Add remaining rows of check buttons
-  $table.InsertRendezvousColumn(coords.left);
+  $table.InsertRendezvousColumn(left);
 console.log("SCANNING TABLE");
   $table.scanTable();
 }
@@ -414,7 +412,7 @@ $.fn.InsertTimeColumn = function(left) {
   $datecell.attr('colspan', cspan + 1);
   // Add new column to the right
   // Add new Time header
-  $table.FinishInsertingTimeColumn({ left: left, top: 1 });
+  $table.FinishInsertingTimeColumn(left);
 }
 $.fn.InsertDateColumn = function(left) {
   var $table = this;
@@ -426,7 +424,12 @@ $.fn.InsertDateColumn = function(left) {
     .insertAfter($datecell)
     .AddDynaWidthEventHandlers();
   // Add new Time header
-  $table.FinishInsertingTimeColumn({ left: left + cspan - 1, top: 1 });
+  $table.FinishInsertingTimeColumn(left + cspan - 1);
+}
+
+$.fn.InsertVenueRow = function(top) {
+  var $table = this;
+
 }
 
 function OnDynaWidthKeyUp(e) {
@@ -453,6 +456,12 @@ console.log("$table:", $table);
 $table.InsertDateColumn(cellpos.left);
           } else if (cellpos.top == 1) {
 $table.InsertTimeColumn(cellpos.left);
+          }
+        } else if (cellpos.top > 1) {
+          if (cellpos.left == 0) {
+$table.InsertVenueRow(cellpos.top);
+          } else if (cellpos.top == 1) {
+$table.InsertCourtRow(cellpos.top);
           }
         }
       }
