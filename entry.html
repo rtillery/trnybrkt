@@ -406,6 +406,16 @@ $.fn.FinishInsertingTimeColumn = function(left) {
 console.log("SCANNING TABLE");
   $table.scanTable();
 }
+$.fn.InsertDateColumn = function(left) {
+  var $table = this;
+  // Add new column to the right
+  var $datecell = $(this).$cellFromPos({ left: left, top: 0 });
+  var cspan = ($datecell.attr('colspan') | 0) || 1;
+  // Add new Date header
+  $(DATEHEADER).insertAfter($datecell).AddDynaWidthEventHandlers();
+  // Add new Time header
+  $table.FinishInsertingTimeColumn(left + cspan - 1);
+}
 $.fn.InsertTimeColumn = function(left) {
   var $table = this;
   // Extend Date header above
@@ -416,37 +426,36 @@ $.fn.InsertTimeColumn = function(left) {
   // Add new Time header
   $table.FinishInsertingTimeColumn(left);
 }
-$.fn.InsertDateColumn = function(left) {
-  var $table = this;
-  // Add new column to the right
-  var $datecell = $(this).$cellFromPos({ left: left, top: 0 });
-  var cspan = ($datecell.attr('colspan') | 0) || 1;
-  // Add new Date header
-  $(DATEHEADER)
-    .insertAfter($datecell)
-    .AddDynaWidthEventHandlers();
-  // Add new Time header
-  $table.FinishInsertingTimeColumn(left + cspan - 1);
-}
 
+$.fn.InsertRow = function(headers, $row) {
+  var $table = this;
+  var dims = $table.data('dims');
+  var newrow = "<tr>" + headers;
+  for(var col = 2; col < dims.width; col++)
+    newrow += RENDEZVOUS;
+  newrow += "</tr>";
+  $(newrow).insertAfter($row).find('th').AddDynaWidthEventHandlers();
+  $table.scanTable();
+}
 $.fn.InsertVenueRow = function(top) {
   var $table = this;
   var $venuecell = $table.$cellFromPos({ left: 0, top: top });
   var rspan = ($venuecell.attr('rowspan') | 0) || 1;
   var $row = $venuecell.closest('tr');
-  while(--rspan) {
+  // Move to top row of Venue group
+  while(--rspan)
     $row = $row.next();
-  }
-  var dims = $table.data('dims');
-  var newrow = "<tr>" + VENUEHEADER + COURTHEADER;
-  for(var col = 2; col < dims.width; col++) {
-    newrow += RENDEZVOUS;
-  }
-  newrow += "</tr>";
-  console.log(newrow);
-  $row.after(newrow);
-  console.log($row.find('th'));
-  $row.find('th').AddDynaWidthEventHandlers();
+  $table.InsertRow(VENUEHEADER + COURTHEADER, $row);
+}
+$.fn.InsertCourtRow = function(top) {
+  var $table = this;
+  var $venuecell = $table.$cellFromPos({ left: 0, top: top });
+  var rspan = ($venuecell.attr('rowspan') | 0) || 1;
+  var $courtcell = $table.$cellFromPos({ left: 1, top: top });
+  var $row = $courtcell.closest('tr');
+  $venuecell.attr('rowspan', rspan + 1);
+  // Add new row below
+  $table.InsertRow(COURTHEADER, $row);
 }
 
 function OnDynaWidthKeyUp(e) {
@@ -477,7 +486,7 @@ $table.InsertTimeColumn(cellpos.left);
         } else if (cellpos.top > 1) {
           if (cellpos.left == 0) {
 $table.InsertVenueRow(cellpos.top);
-          } else if (cellpos.top == 1) {
+          } else if (cellpos.left == 1) {
 $table.InsertCourtRow(cellpos.top);
           }
         }
