@@ -280,15 +280,37 @@ function OnDynaWidthInput() {
   });
 }
 
+$.fn.DeleteVenueRow = function(top) {
+  var $table = this;
+
+}
 function OnDynaWidthKeyDown(e) {
   var key = e.which;
   var text = $(this).val();
-  var pos = this.selectionStart;
+  var curpos = this.selectionStart;
+  var $thiscell = $(this).closest('th');
+  var cellpos = $thiscell.data('cellPos');
+  var $table = $thiscell.closest('table');
   switch (key) {
     case 8: // [Backspace]
       if (text.length <= 0) {
         e.preventDefault();
         // Delete this header (unless only in this row) and move to previous in this row (unless first)
+        if (curpos == 0) {
+          if (cellpos.left > 1) {
+            if (cellpos.top == 0) {
+              $table.DeleteDateColumn(cellpos.left);
+            } else if (cellpos.top == 1) {
+              $table.DeleteTimeColumn(cellpos.left);
+            }
+          } else if (cellpos.top > 1) {
+            if (cellpos.left == 0) {
+              $table.DeleteVenueRow(cellpos.top);
+            } else if (cellpos.left == 1) {
+              $table.DeleteCourtRow(cellpos.top);
+            }
+          }
+        }
       }
       break;
     // case 9: // [Tab]
@@ -298,11 +320,10 @@ function OnDynaWidthKeyDown(e) {
     //   // Move to previous header in this row (unless first)
     //   break;
     case 37: // [←] (left arrow)
-      if (pos <= 0) {
+      if (cellpos <= 0) {
         e.preventDefault();
         // Move to previous header in this row (unless first)
-        var thispos = $(this).closest('th').posFromCell();
-        var newpos = { left: thispos.left - 1, top: thispos.top };
+        var newpos = { left: cellpos.left - 1, top: cellpos.top };
         if (newpos.left >= 0) {
           var $newcell = $(this).$cellFromPos(newpos);
           if ($newcell) {
@@ -318,8 +339,7 @@ function OnDynaWidthKeyDown(e) {
     case 38: // [↑] (up arrow)
       e.preventDefault();
       // Move to previous header row (unless first)
-      var thispos = $(this).closest('th').posFromCell();
-      var newpos = { left: thispos.left, top: thispos.top - 1 };
+      var newpos = { left: cellpos.left, top: cellpos.top - 1 };
       if (newpos.left >= 0) {
         var $newcell = $(this).$cellFromPos(newpos);
         if ($newcell) {
@@ -332,13 +352,11 @@ function OnDynaWidthKeyDown(e) {
       }
       break;
     case 39: // [→] (right arrow)
-      if (pos >= text.length) {
+      if (cellpos >= text.length) {
         e.preventDefault();
         // Move to next header in this row (unless last)
-        var $thiscell = $(this).closest('th');
-        var thispos = $thiscell.posFromCell();
         var cspan = ($thiscell.attr( "colspan" ) | 0) || 1;
-        var newpos = { left: thispos.left + cspan, top: thispos.top };
+        var newpos = { left: cellpos.left + cspan, top: cellpos.top };
         var $newcell = $(this).$cellFromPos(newpos);
         if ($newcell) {
           var $newin = $($newcell.find('.dynawidth')[0]);
@@ -352,10 +370,8 @@ function OnDynaWidthKeyDown(e) {
     case 40: // [↓] (down arrow)
       e.preventDefault();
       // Move to next header row (unless last)
-      var $thiscell = $(this).closest('th');
-      var thispos = $thiscell.posFromCell();
       var rspan = ($thiscell.attr( "rowspan" ) | 0) || 1;
-      var newpos = { left: thispos.left, top: thispos.top + rspan };
+      var newpos = { left: cellpos.left, top: cellpos.top + rspan };
       var $newcell = $(this).$cellFromPos(newpos);
       if ($newcell) {
         var $newin = $($newcell.find('.dynawidth')[0]);
@@ -479,15 +495,15 @@ console.log("$table:", $table);
       if (curpos == text.length) {
         if (cellpos.left > 1) {
           if (cellpos.top == 0) {
-$table.InsertDateColumn(cellpos.left);
+            $table.InsertDateColumn(cellpos.left);
           } else if (cellpos.top == 1) {
-$table.InsertTimeColumn(cellpos.left);
+            $table.InsertTimeColumn(cellpos.left);
           }
         } else if (cellpos.top > 1) {
           if (cellpos.left == 0) {
-$table.InsertVenueRow(cellpos.top);
+            $table.InsertVenueRow(cellpos.top);
           } else if (cellpos.left == 1) {
-$table.InsertCourtRow(cellpos.top);
+            $table.InsertCourtRow(cellpos.top);
           }
         }
       }
