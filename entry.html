@@ -150,13 +150,24 @@ console.log("locationsAndTimes:", locationsAndTimes);
 function SendEntryDataToServer() {
   var name = $("input[name='name']").val();
   var date = $("input[name='date']").val();
-  var dateFormat = $('#dateformats').val();
+  var dateFormat = dateOptions[$('#dateformats').val()];
+  var language = GetLang();
+  var teamsPerPool = $("input[name='teamsperpool']").val();
+  var numPools = $("input[name='numpools']").val();
+  var numPowerPools = $("input[name='numpowerpools']").val();
+  var teamsPerPowerPool = $("input[name='teamsperpowerpool']").val();
+  var avoidClub = $("input[name='avoidclub']").is(':checked');
   var locationsAndTimes = GatherLocationsAndTimes();
   var entryData = {
     name: name,
     date: date,
-    dateFormat: dateOptions[dateFormat],
-    language: GetLang(),
+    dateFormat: dateFormat,
+    language: language,
+    teamsPerPool: teamsPerPool,
+    numPools: numPools,
+    numPowerPools: numPowerPools,
+    teamsPerPowerPool: teamsPerPowerPool,
+    avoidClub: avoidClub,
     locationsAndTimes: locationsAndTimes,
     teams: teams,
   };
@@ -541,6 +552,11 @@ console.log("$table:", $table);
   }
 }
 
+function pptoggle(elem) {
+  var enabled = $(elem).is(":checked");
+  $(".powerpoolenable").prop('disabled', !enabled);
+}
+
 $(document).ready(function() {
   $('.event').scanTable();
 
@@ -579,24 +595,32 @@ $(document).ready(function() {
         <td><input type='date' name='date' onchange='onDateChange()'>&nbsp;Format:&nbsp;<select id='dateformats'></select></td>
       </tr>
       <tr>
-        <td class='label'>Power Pools:</td>
-        <td><input type='checkbox'></td>
+        <td class='label'>Number of Teams Per Pool:</td>
+        <td><input type='number' name='teamsperpool' min='3' step='1' value='4'></td>
       </tr>
       <tr>
-        <td class='label disabled'>Number of Power Pools:</td>
-        <td><input type='number' min='0' max='2' step='1' value='0' disabled></td>
+        <td class='label'>Total Number of Pools:</td>
+        <td><input type='number' name='numpools' min='0' step='1' value='0'>&nbsp;<span>(0 = total teams / teams per pool)</span></td>
       </tr>
       <tr>
-        <td class='label disabled'>Teams per Power Pool:</td>
-        <td><input type='number' min='3' max='4' value='3' disabled></td>
+        <td class='label'>Include Power Pools:</td>
+        <td><input type='checkbox' name='includepowerpools' onClick=pptoggle(this)></td>
       </tr>
       <tr>
-        <td class='label'>Paste Team List Here:</td>
-        <td><textarea name='excel_data' cols='20' rows='1' onchange='onExcelPaste()'></textarea></td>
+        <td class='label disabled powerpoolenable'>Number of Power Pools:</td>
+        <td><input class='powerpoolenable' type='number' name='numpowerpools' min='0' max='2' step='1' value='0' disabled></td>
       </tr>
-
-      <tr><td colspan='2'>
-        <table class='event'>
+      <tr>
+        <td class='label disabled powerpoolenable'>Teams per Power Pool:</td>
+        <td><input class='powerpoolenable' type='number' name='teamsperpowerpool' min='3' max='4' value='3' disabled></td>
+      </tr>
+      <tr>
+        <td class='label'>Avoid Same Club in Same Pool:</td>
+        <td><input type='checkbox' name='avoidclub'></td>
+      </tr>
+      <tr>
+        <td class='label'>Dates,<br>Times,<br>& Locations:</td>
+        <td><table class='event'>
           <thead>
             <tr><th colspan='2'></th><th class='rvdate' colspan='2'><input type='text' class='dynawidth' value='May 5, 2018'></th><th class='rvdate' colspan='2'><input type='text' class='dynawidth' value='May 6, 2018'></th></tr>
             <tr><th colspan='2'></th><th class='rvtime'><input type='text' class='dynawidth' value='8:00 AM'></th><th class='rvtime'><input type='text' class='dynawidth' value='3:00 PM'></th><th class='rvtime'><input type='text' class='dynawidth' value='8:00 AM'></th><th class='rvtime'><input type='text' class='dynawidth' value='3:00 PM'></th></tr>
@@ -607,8 +631,13 @@ $(document).ready(function() {
             <tr><th class='rvvenue' rowspan='2'><input type='text' class='dynawidth' value='Venue 2'></th><th class='rvcourt'><input type='text' class='dynawidth' value='Court 1'></th><td><input type='checkbox' checked></td><td><input type='checkbox' checked></td><td><input type='checkbox' checked></td><td><input type='checkbox' checked></tr>
             <tr><th class='rvcourt'><input type='text' class='dynawidth' value='Court 2'></th><td><input type='checkbox' checked></td><td><input type='checkbox' checked></td><td><input type='checkbox' checked></td><td><input type='checkbox' checked></tr>
           </tbody>
-        </table>
-      </td></tr>
+        </table></td>
+      </tr>
+
+      <tr>
+        <td class='label'>Paste Team List Here =></td>
+        <td><textarea name='excel_data' placeholder='Paste Team List Here' cols='30' rows='2' onchange='onExcelPaste()'></textarea></td>
+      </tr>
 
       <tr><td colspan='2'>
         <table class='matrix'>
