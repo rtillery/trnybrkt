@@ -254,10 +254,15 @@ function SeparateClubTeams(options, numTeams, pools) {
 
 function TeamListToPools(teamList, options) {
   var pools = CreateArray(options.totalPools, options.teamsPerPool);
+  var lat = 0;
 for (var poolNum = 0; poolNum < pools.length; poolNum++) {
   pools[poolNum].name = `Pool ${poolNum + 1}`;
-  pools[poolNum].location = options.locations[Math.floor(poolNum / options.times.length) % options.locations.length];
-  pools[poolNum].time = options.times[poolNum % options.times.length];
+  var locationAndTime = options.locationsAndTimes[lat];
+  pools[poolNum].location = locationAndTime.location;
+  pools[poolNum].time = locationAndTime.time;
+//  pools[poolNum].location = options.locations[Math.floor(poolNum / options.times.length) % options.locations.length];
+//  pools[poolNum].time = options.times[poolNum % options.times.length];
+  lat++;
 }
   for (var teamIdx = 0; teamIdx < teamList.length; teamIdx++) {
     var poolSpot = SeedToPoolSpot(options, teamIdx);
@@ -271,8 +276,7 @@ for (var poolNum = 0; poolNum < pools.length; poolNum++) {
 defaultOptions = {
   name: 'UNKNOWN',
   date: 'UNKNOWN',
-  locations: [],
-  times: [],
+  locationsAndTimes: [],
   totalPools: Math.floor((teams.length + 3) / 4),
   powerPools: 0,
   teamsPerPool: 4,
@@ -303,17 +307,19 @@ options = CopyObj(defaultOptions);
 // Override from tournament
 options.groupName = "NTR Bid Regional 14 Open";
 options.date = "May 5, 2018";
-options.locations = [
-  "Courtside Court 1",
-  "Courtside Court 2",
-  "Courtside Court 3",
-  "Courtside Court 4",
-  "Courtside Court 5",
-  "Courtside Court 6",
-];
-options.times = [
-  "8:00 AM",
-  "3:00 PM",
+options.locationsAndTimes = [
+  { location: "Courtside Court 1", time: "9:00 AM" },
+  { location: "Courtside Court 1", time: "2:00 AM" },
+  { location: "Courtside Court 2", time: "9:00 AM" },
+  { location: "Courtside Court 2", time: "2:00 AM" },
+  { location: "Courtside Court 3", time: "9:00 AM" },
+  { location: "Courtside Court 3", time: "2:00 AM" },
+  { location: "Courtside Court 4", time: "9:00 AM" },
+  { location: "Courtside Court 4", time: "2:00 AM" },
+  { location: "Courtside Court 5", time: "9:00 AM" },
+  { location: "Courtside Court 5", time: "2:00 AM" },
+  { location: "Courtside Court 6", time: "9:00 AM" },
+  { location: "Courtside Court 6", time: "2:00 AM" },
 ];
 options.totalPools = 12;
 //options.powerPools = 2;
@@ -396,6 +402,17 @@ teams = JSON.parse(body).teams;
 //for (var i = 0; i < teams.length; i++) {
 //  console.log(`${teams[i].friendlyName}`);
 //}
+
+options.groupName = JSON.parse(body).name;
+console.log(options.groupName);
+var language = JSON.parse(body).language;
+console.log(language);
+var dateFormat = JSON.parse(body).dateFormat;
+console.log(dateFormat);
+var rawdate = new Date(JSON.parse(body).date + 'T00:00:00');
+options.date = rawdate.toLocaleDateString(language, dateFormat);
+options.locationsAndTimes = JSON.parse(body).locationsAndTimes;
+
 console.log(JSON.parse(body));
 pools = TeamListToPools(teams, options);
 });

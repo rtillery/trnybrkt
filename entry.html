@@ -100,13 +100,39 @@ function SendDataToServer(data) {
   request.send(data);
 }
 
+function GatherLocations() {
+  var locations = [];
+  var venue = '';
+  $(".event tbody tr th").each(function(index, elem) {
+    var $cell = $(this);
+    if ($cell.hasClass('rvvenue')) {
+      venue = $cell.find('.dynawidth').val();
+    } else {
+      locations.push(venue + ' ' + $cell.find('.dynawidth').val());
+    }
+  })
+  return locations;
+}
+
+// @@@ TODO: BUG: Date not included in times
+function GatherTimes() {
+  var times = [];
+  $(".event thead th").each(function(index, elem) {
+    var $cell = $(this);
+    if ($cell.hasClass('rvtime')) {
+      times.push($cell.find('.dynawidth').val());
+    }
+  })
+  return times;
+}
+
 function GatherLocationsAndTimes() {
-  var locations = $("textarea[name='locations']").val().split('\n');
-  var times = $("textarea[name='times']").val().split('\n');
+  var locations = GatherLocations();
+  var times = GatherTimes();
   var tablerow = $('.matrix tbody tr:first-child');
   var locationsAndTimes = [];
   var location = 0;
-  $('.matrix tbody tr').each(function() {
+  $('.event tbody tr').each(function() {
     var time = 0;
     $('td', this).each(function() {
       locationsAndTimes.push({
@@ -117,6 +143,7 @@ function GatherLocationsAndTimes() {
     });
     location++;
   });
+console.log("locationsAndTimes:", locationsAndTimes);
   return locationsAndTimes;
 }
 
@@ -128,13 +155,16 @@ function SendEntryDataToServer() {
   var entryData = {
     name: name,
     date: date,
-    dateFormat: dateFormat,
+    dateFormat: dateOptions[dateFormat],
+    language: GetLang(),
     locationsAndTimes: locationsAndTimes,
     teams: teams,
   };
+console.log("*** SENDING DATA TO SERVER ***");
 console.log(entryData);
   var postData = JSON.stringify(entryData);
   SendDataToServer(postData);
+console.log("******************************");
 
   return false; // ???
 }
@@ -390,10 +420,10 @@ function OnDynaWidthKeyDown(e) {
   }
 }
 
-DATEHEADER = "<th><input type='text' class='dynawidth' placeholder='Date'></th>";
-TIMEHEADER = "<th><input type='text' class='dynawidth' placeholder='Time'></th>";
-VENUEHEADER = "<th><input type='text' class='dynawidth' placeholder='Venue'></th>";
-COURTHEADER = "<th><input type='text' class='dynawidth' placeholder='Court'></th>";
+DATEHEADER = "<th class='rvdate'><input type='text' class='dynawidth' placeholder='Date'></th>";
+TIMEHEADER = "<th class='rvtime'><input type='text' class='dynawidth' placeholder='Time'></th>";
+VENUEHEADER = "<th class='rvvenue'><input type='text' class='dynawidth' placeholder='Venue'></th>";
+COURTHEADER = "<th class='rvcourt'><input type='text' class='dynawidth' placeholder='Court'></th>";
 RENDEZVOUS = "<td><input type='checkbox' checked></td>";
 
 $.fn.AddDynaWidthEventHandlers = function() {
@@ -568,14 +598,14 @@ $(document).ready(function() {
       <tr><td colspan='2'>
         <table class='event'>
           <thead>
-            <tr><th colspan='2'></th><th colspan='2'><input type='text' class='dynawidth' value='May 5, 2018'></th><th colspan='2'><input type='text' class='dynawidth' value='May 6, 2018'></th></tr>
-            <tr><th colspan='2'></th><th><input type='text' class='dynawidth' value='8:00 AM'></th><th><input type='text' class='dynawidth' value='3:00 PM'></th><th><input type='text' class='dynawidth' value='8:00 AM'></th><th><input type='text' class='dynawidth' value='3:00 PM'></th></tr>
+            <tr><th colspan='2'></th><th class='rvdate' colspan='2'><input type='text' class='dynawidth' value='May 5, 2018'></th><th class='rvdate' colspan='2'><input type='text' class='dynawidth' value='May 6, 2018'></th></tr>
+            <tr><th colspan='2'></th><th class='rvtime'><input type='text' class='dynawidth' value='8:00 AM'></th><th class='rvtime'><input type='text' class='dynawidth' value='3:00 PM'></th><th class='rvtime'><input type='text' class='dynawidth' value='8:00 AM'></th><th class='rvtime'><input type='text' class='dynawidth' value='3:00 PM'></th></tr>
           </thead>
           <tbody>
-            <tr><th rowspan='2'><input type='text' class='dynawidth' value='Venue 1'></th><th><input type='text' class='dynawidth' value='Court 1'></th><td><input type='checkbox' checked></td><td><input type='checkbox' checked></td><td><input type='checkbox' checked></td><td><input type='checkbox' checked></tr>
-            <tr><th><input type='text' class='dynawidth' value='Court 2'></th><td><input type='checkbox' checked></td><td><input type='checkbox' checked></td><td><input type='checkbox' checked></td><td><input type='checkbox' checked></tr>
-            <tr><th rowspan='2'><input type='text' class='dynawidth' value='Venue 2'></th><th><input type='text' class='dynawidth' value='Court 1'></th><td><input type='checkbox' checked></td><td><input type='checkbox' checked></td><td><input type='checkbox' checked></td><td><input type='checkbox' checked></tr>
-            <tr><th><input type='text' class='dynawidth' value='Court 2'></th><td><input type='checkbox' checked></td><td><input type='checkbox' checked></td><td><input type='checkbox' checked></td><td><input type='checkbox' checked></tr>
+            <tr><th class='rvvenue' rowspan='2'><input type='text' class='dynawidth' value='Venue 1'></th><th class='rvcourt'><input type='text' class='dynawidth' value='Court 1'></th><td><input type='checkbox' checked></td><td><input type='checkbox' checked></td><td><input type='checkbox' checked></td><td><input type='checkbox' checked></tr>
+            <tr><th class='rvcourt'><input type='text' class='dynawidth' value='Court 2'></th><td><input type='checkbox' checked></td><td><input type='checkbox' checked></td><td><input type='checkbox' checked></td><td><input type='checkbox' checked></tr>
+            <tr><th class='rvvenue' rowspan='2'><input type='text' class='dynawidth' value='Venue 2'></th><th class='rvcourt'><input type='text' class='dynawidth' value='Court 1'></th><td><input type='checkbox' checked></td><td><input type='checkbox' checked></td><td><input type='checkbox' checked></td><td><input type='checkbox' checked></tr>
+            <tr><th class='rvcourt'><input type='text' class='dynawidth' value='Court 2'></th><td><input type='checkbox' checked></td><td><input type='checkbox' checked></td><td><input type='checkbox' checked></td><td><input type='checkbox' checked></tr>
           </tbody>
         </table>
       </td></tr>
