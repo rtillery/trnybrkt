@@ -194,12 +194,13 @@ dateOptions = [
 ];
 function onDateChange() {
   $('#dateformats').children('option').remove();
+  var rawdate = $("input[name='date']").val();
+  var dateparts = rawdate.split('-');
+  var format = new Date(dateparts[0], dateparts[1] - 1, dateparts[2]);
+console.log(format);
   $.each(dateOptions, function(index, value){
-    console.log(value);
-    console.log($("input[name='date']").val());
-    var format = new Date($("input[name='date']").val() + 'T00:00:00');
-    console.log(format);
-    $('#dateformats').append($('<option>', { 'value': index, 'text': format.toLocaleDateString(GetLang(), value) }));
+    var date = format.toLocaleDateString(GetLang(), value);
+    $('#dateformats').append($('<option>', { 'value': index, 'text': date }));
   });
 }
 // https://ntrvolleyball.net/wp-content/uploads/2017/08/Power-Pool-Format-Information-1.pdf

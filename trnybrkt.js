@@ -300,8 +300,15 @@ options.groupName = JSON.parse(body).name;
 
 var language = JSON.parse(body).language;
 var dateFormat = JSON.parse(body).dateFormat;
-var rawdate = new Date(JSON.parse(body).date + 'T00:00:00');
-options.date = rawdate.toLocaleDateString(language, dateFormat);
+var rawdate = JSON.parse(body).date;
+var dateparts = rawdate.split('-');
+var dateobj = new Date(dateparts[0], dateparts[1] - 1, dateparts[2]);
+options.date = dateobj.toLocaleDateString(language, dateFormat);
+// console.log("*** language:", language);
+// console.log("*** dateFormat:", dateFormat);
+// console.log("*** rawdate:", rawdate);
+// console.log("*** dateobj:", dateobj);
+// console.log("*** options.date:", options.date);
 
 options.teamsPerPool = JSON.parse(body).teamsPerPool * 1;
 
