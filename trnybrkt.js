@@ -37,7 +37,6 @@ function SeedToPoolSpot(options, overallSeedMinus1) {
 //  throw new Error();
   var poolSpot = {};
   var powerPoolTeams = options.powerPools * options.teamsPerPowerPool;
-console.log("<><><> powerPoolTeams:", powerPoolTeams);
   if (overallSeedMinus1 < powerPoolTeams) {
     var powerPoolOptions = {
       totalPools: options.powerPools,
@@ -48,14 +47,10 @@ console.log("<><><> powerPoolTeams:", powerPoolTeams);
     poolSpot = SeedToPoolSpot(powerPoolOptions, overallSeedMinus1);
   } else {
     var actualSeedMinus1 = overallSeedMinus1 - powerPoolTeams;
-console.log("<><><> actualSeedMinus1:", actualSeedMinus1);
     var nonPowerTeamPools = options.totalPools - options.powerPools;
-console.log("<><><> notPowerTeamPools:", nonPowerTeamPools);
     var poolSeedMinus1 = Math.floor(actualSeedMinus1 / nonPowerTeamPools);
-console.log("<><><> poolSeedMinus1:", poolSeedMinus1);
     var poolMinus1 = Math.abs((actualSeedMinus1 % nonPowerTeamPools) -
                     ((poolSeedMinus1 % 2) * (nonPowerTeamPools - 1)));
-console.log("<><><> poolMinus1:", poolMinus1);
     poolSpot = { poolNum: poolMinus1 + options.powerPools, seed: poolSeedMinus1 };
   }
 //console.log(`SeedToPoolSpot() exit = { poolNum: ${poolSpot.poolNum}, seed: ${poolSpot.seed}}`);
@@ -152,18 +147,17 @@ function TeamListToPools(teamList, options) {
   var lat = 0;
   // Set up pool names, times, and locations
   for (var poolNum = 0; poolNum < pools.length; poolNum++) {
-    pools[poolNum].name = `Pool ${poolNum + 1}`;
-    var locationAndTime = options.locationsAndTimes[lat];
+    if (poolNum < options.powerPools)
+      pools[poolNum].name = `Power Pool ${String.fromCharCode('A'.charCodeAt(0) + poolNum)}`;
+    else
+      pools[poolNum].name = `Pool ${poolNum + 1 - options.powerPools}`;
+    var locationAndTime = options.locationsAndTimes[lat++];
     pools[poolNum].location = locationAndTime.location;
     pools[poolNum].time = locationAndTime.time;
-    lat++;
   }
   // Seed teams into pools
   for (var teamIdx = 0; teamIdx < teamList.length; teamIdx++) {
-console.log(">>> teamIdx:", teamIdx);
     var poolSpot = SeedToPoolSpot(options, teamIdx);
-console.log(">>> poolSpot:", poolSpot);
-console.log(">>> teamList[teamIdx]:", teamList[teamIdx]);
     pools[poolSpot.poolNum][poolSpot.seed] = teamList[teamIdx];
   }
   if (options.avoidSameClub)
@@ -259,7 +253,7 @@ const date = options.date;
       res.write("      <td class='pool'>\n");
       var poolNum = poolBase + rowPool;
       if (poolNum < pools.length) {
-        res.write(`    <div class='poolheading'>Pool ${poolNum + 1}</div>\n`);
+        res.write(`    <div class='poolheading'>${pools[poolNum].name}</div>\n`);
         res.write(`    <div class='court'>${pools[poolNum].location}</div>\n`);
         res.write(`    <div class='time'>${pools[poolNum].time}</div>\n`);
         res.write("    <hr>\n");
