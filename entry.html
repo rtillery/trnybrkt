@@ -556,6 +556,8 @@ console.log("$table:", $table);
 function pptoggle(elem) {
   var enabled = $(elem).is(":checked");
   $(".powerpoolenable").prop('disabled', !enabled);
+  if (!enabled)
+    $("input[name='numpowerpools']").val(0);
 }
 
 $(document).ready(function() {
