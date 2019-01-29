@@ -94,7 +94,8 @@ console.log(`readyState: ${request.readyState}, status: ${request.status}`);
   }
 }
 function SendDataToServer(data) {
-  var url = 'http:/localhost:4242/server.js';
+var url = 'https://silicon-vertex-215516.appspot.com/server.js';
+//  var url = 'http:/localhost:4242/server.js';
   request.open('POST', url, true);
   request.onreadystatechange = SendData;
   request.send(data);
