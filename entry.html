@@ -37,6 +37,15 @@ button {
 </style>
 <script>
 
+var scripts = document.getElementsByTagName("script");
+var thisscript = scripts[scripts.length-1];
+var path = document.location.pathname;
+var parts = location.href.split('/');
+//console.log("XXX thisscript:", thisscript);
+//console.log("XXX path:", path);
+//console.log("XXX location.href:", parts[0]);
+console.log("XXX string subtraction:", location.href.replace(path, ''));
+
 teams = [];
 
 function onExcelPaste() {
