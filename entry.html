@@ -37,28 +37,6 @@ button {
 </style>
 <script>
 
-function onLocationChange() {
-  var locations = $("textarea[name='locations']").val().split("\n");
-  var times = $("textarea[name='times']").val().split("\n");
-  console.log(locations);
-  console.log(times);
-  var headerrow = "<tr><th></th>";
-  var checkrow = "";
-  for (var col = 0; col < times.length; col++) {
-    headerrow += `<th>${times[col]}</th>`;
-    checkrow += "<td><input type='checkbox' checked></td>";
-  }
-  headerrow += "</tr>";
-  console.log(headerrow);
-  $('.matrix thead').html(headerrow);
-  for (var row = 0; row < locations.length; row++) {
-    var newrow = `<tr><td><b>${locations[row]}</b></td>${checkrow}</tr>`;
-    console.log(newrow);
-    $('.matrix tbody').append(newrow);
-  }
-}
-function onTimeChange() { onLocationChange() }
-
 teams = [];
 
 function onExcelPaste() {
