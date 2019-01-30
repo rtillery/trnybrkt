@@ -47,7 +47,6 @@ function onExcelPaste() {
     console.log(data);
   var rows = data.split("\n");
 
-teams = [];
   var table = $('<table />');
   for(var y in rows) {
       var cells = rows[y].split("\t");
@@ -67,13 +66,12 @@ var request = new XMLHttpRequest();
 
 function SendData() {
 console.log(`readyState: ${request.readyState}, status: ${request.status}`);
+console.log(request);
   if (request.readyState == 4 && request.status == 200) {
-    alert('Data sent...\n');
-  } else {
-    alert('Connection FAIL,\nCheck connection and Retry!!!');
-    console.log(request);
+    console.log("Data upload complete.");
   }
 }
+
 function SendDataToServer(data) {
 var url = scriptlocation + "/server.js";
 // var url = 'https://silicon-vertex-215516.appspot.com/server.js';
