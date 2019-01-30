@@ -1,5 +1,5 @@
-var scriptlocation = location.href.replace(document.location.pathname, '');
-console.log("XXX file location:", scriptlocation);
+// var scriptlocation = location.href.replace(document.location.pathname, '');
+// console.log("XXX file location:", scriptlocation);
 
 teams = [];
 
