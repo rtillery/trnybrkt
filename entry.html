@@ -37,14 +37,8 @@ button {
 </style>
 <script>
 
-var scripts = document.getElementsByTagName("script");
-var thisscript = scripts[scripts.length-1];
-var path = document.location.pathname;
-var parts = location.href.split('/');
-//console.log("XXX thisscript:", thisscript);
-//console.log("XXX path:", path);
-//console.log("XXX location.href:", parts[0]);
-console.log("XXX string subtraction:", location.href.replace(path, ''));
+var scriptlocation = location.href.replace(document.location.pathname, '');
+console.log("XXX file location:", scriptlocation);
 
 teams = [];
 
@@ -81,8 +75,9 @@ console.log(`readyState: ${request.readyState}, status: ${request.status}`);
   }
 }
 function SendDataToServer(data) {
-var url = 'https://silicon-vertex-215516.appspot.com/server.js';
-//  var url = 'http:/localhost:4242/server.js';
+var url = scriptlocation + "/server.js";
+// var url = 'https://silicon-vertex-215516.appspot.com/server.js';
+// var url = 'http:/localhost:4242/server.js';
   request.open('POST', url, true);
   request.onreadystatechange = SendData;
   request.send(data);

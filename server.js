@@ -1,3 +1,6 @@
+var scriptlocation = location.href.replace(document.location.pathname, '');
+console.log("XXX file location:", scriptlocation);
+
 teams = [];
 
 function CopyObj(obj) {
