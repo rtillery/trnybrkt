@@ -536,9 +536,13 @@ console.log("$table:", $table);
 
 function pptoggle(elem) {
   var enabled = $(elem).is(":checked");
-  $(".powerpoolenable").prop('disabled', !enabled);
-  if (!enabled)
+  $("input.powerpooltoggle").prop('disabled', !enabled);
+  if (!enabled) {
     $("input[name='numpowerpools']").val(0);
+    $("td.powerpooltoggle").addClass('disabled');
+  } else {
+    $("td.powerpooltoggle").removeClass('disabled');
+  }
 }
 
 $(document).ready(function() {
@@ -591,12 +595,12 @@ $(document).ready(function() {
         <td><input type='checkbox' name='includepowerpools' onClick=pptoggle(this)></td>
       </tr>
       <tr>
-        <td class='label disabled powerpoolenable'>Number of Power Pools:</td>
-        <td><input class='powerpoolenable' type='number' name='numpowerpools' min='0' max='2' step='1' value='0' disabled></td>
+        <td class='label disabled powerpooltoggle'>Number of Power Pools:</td>
+        <td><input class='powerpooltoggle' type='number' name='numpowerpools' min='0' max='2' step='1' value='0' disabled></td>
       </tr>
       <tr>
-        <td class='label disabled powerpoolenable'>Teams per Power Pool:</td>
-        <td><input class='powerpoolenable' type='number' name='teamsperpowerpool' min='3' max='4' value='3' disabled></td>
+        <td class='label disabled powerpooltoggle'>Teams per Power Pool:</td>
+        <td><input class='powerpooltoggle' type='number' name='teamsperpowerpool' min='3' max='4' value='3' disabled></td>
       </tr>
       <tr>
         <td class='label'>Avoid Same Club in Same Pool:</td>
