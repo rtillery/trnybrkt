@@ -1,0 +1,31 @@
+body {
+  font-family: serif;
+  font-size: 16px;
+}
+.label {
+  text-align: right;
+}
+.disabled {
+  color: lightgray;
+}
+button {
+  width: 100%;
+  font-weight: 700;
+}
+.event, .event th, .event td,
+.rendezvous, .rendezvous th, .rendezvous td {
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+.event tbody tr td, .event thead tr th,
+.rendezvous tbody tr td, .rendezvous thead tr th {
+  text-align: center;
+  width: auto;
+}
+.dynawidth {
+  display: inline-block;
+  font-family: serif;
+  font-weight: 700;
+  font-size: 16px;
+  border: none;
+}
