@@ -1,0 +1,19 @@
+{
+  "name": "trnybrkt",
+  "version": "1.0.0",
+  "description": "",
+  "main": "trnybrkt.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rtillery/trnybrkt.git"
+  },
+  "author": "Rick Tillery",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/rtillery/trnybrkt/issues"
+  },
+  "homepage": "https://github.com/rtillery/trnybrkt#readme"
+}
