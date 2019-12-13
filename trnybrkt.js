@@ -312,7 +312,15 @@ options.date = dateobj.toLocaleDateString(language, dateFormat);
 
 options.teamsPerPool = JSON.parse(body).teamsPerPool * 1;
 
-options.totalPools = (JSON.parse(body).numPools * 1) | Math.ceil(teams.length / options.teamsPerPool);
+console.log("*** JSON.totalPools:", JSON.parse(body).numPools);
+//options.totalPools = (JSON.parse(body).numPools * 1) | Math.ceil(teams.length / options.teamsPerPool);
+options.totalPools = JSON.parse(body).numPools * 1;
+console.log("*** (from JSON to int) options.totalPools:", options.totalPools);
+if (!options.totalPools) {
+  options.totalPools = Math.ceil(teams.length / options.teamsPerPool);
+  console.log("*** (replacing) options.totalPools:", options.totalPools);
+}
+console.log("*** options.totalPools:", options.totalPools);
 
 options.powerPools = (JSON.parse(body).numPowerPools * 1);
 
@@ -375,6 +383,7 @@ const server = http.createServer((req, res) => {
 });
 */
 
-server.listen(4242, () => {
-  console.log('Server is running...');
+const PORT = process.env.PORT || 5000;
+server.listen(PORT, () => {
+  console.log(`Server is running (port: ${PORT})...`);
 });
