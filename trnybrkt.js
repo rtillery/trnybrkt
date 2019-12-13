@@ -289,26 +289,16 @@ var server = http.createServer(
 console.log(`req.url: ${req.url}\n`);
     if (req.method == 'POST') {
 console.log("POST ed");
-console.log("one");
-console.log("two");
-console.log("three");
-console.log("four");
-console.log("five");
-console.log("six");
-console.log("seven");
-console.log("eight");
-console.log("nine");
-console.log("ten");
       var body = '';
       req.on('data', function (data) {
+console.log(`RECEIVE: \"${data}\"`);
         body += data;
       });
       req.on('end', function (data) {
         teams = JSON.parse(body).teams;
-
-for (var i = 0; i < teams.length; i++) {
-  console.log(`${teams[i].friendlyName}`);
-}
+// for (var i = 0; i < teams.length; i++) {
+//   console.log(`${teams[i].friendlyName}`);
+// }
 
         options.groupName = JSON.parse(body).name;
 
