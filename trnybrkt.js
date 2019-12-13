@@ -237,8 +237,8 @@ function PageFooter(res) {
 
 function PoolPage(res, pools) {
 
-const name = options.groupName;
-const date = options.date;
+  const name = options.groupName;
+  const date = options.date;
 
   PageHeader(res);
   res.write("<body>\n");
@@ -289,54 +289,54 @@ var server = http.createServer(
 console.log(`req.url: ${req.url}\n`);
     if (req.method == 'POST') {
 console.log("POST");
-var body = '';
-req.on('data', function (data) {
-  body += data;
-});
-req.on('end', function (data) {
-teams = JSON.parse(body).teams;
+      var body = '';
+      req.on('data', function (data) {
+        body += data;
+      });
+      req.on('end', function (data) {
+        teams = JSON.parse(body).teams;
 //for (var i = 0; i < teams.length; i++) {
 //  console.log(`${teams[i].friendlyName}`);
 //}
 
-options.groupName = JSON.parse(body).name;
+        options.groupName = JSON.parse(body).name;
 
-var language = JSON.parse(body).language;
-var dateFormat = JSON.parse(body).dateFormat;
-var rawdate = JSON.parse(body).date;
-var dateparts = rawdate.split('-');
-var dateobj = new Date(dateparts[0], dateparts[1] - 1, dateparts[2]);
-options.date = dateobj.toLocaleDateString(language, dateFormat);
+        var language = JSON.parse(body).language;
+        var dateFormat = JSON.parse(body).dateFormat;
+        var rawdate = JSON.parse(body).date;
+        var dateparts = rawdate.split('-');
+        var dateobj = new Date(dateparts[0], dateparts[1] - 1, dateparts[2]);
+        options.date = dateobj.toLocaleDateString(language, dateFormat);
 // console.log("*** language:", language);
 // console.log("*** dateFormat:", dateFormat);
 // console.log("*** rawdate:", rawdate);
 // console.log("*** dateobj:", dateobj);
 // console.log("*** options.date:", options.date);
 
-options.teamsPerPool = JSON.parse(body).teamsPerPool * 1;
+        options.teamsPerPool = JSON.parse(body).teamsPerPool * 1;
 
-options.totalPools = (JSON.parse(body).numPools * 1) | Math.ceil(teams.length / options.teamsPerPool);
+        options.totalPools = (JSON.parse(body).numPools * 1) | Math.ceil(teams.length / options.teamsPerPool);
 
-options.powerPools = (JSON.parse(body).numPowerPools * 1);
+        options.powerPools = (JSON.parse(body).numPowerPools * 1);
 
-options.teamsPerPowerPool = (JSON.parse(body).teamsPerPowerPool * 1);
+        options.teamsPerPowerPool = (JSON.parse(body).teamsPerPowerPool * 1);
 
-options.avoidSameClub = JSON.parse(body).avoidClub;
+        options.avoidSameClub = JSON.parse(body).avoidClub;
 
-options.locationsAndTimes = JSON.parse(body).locationsAndTimes;
+        options.locationsAndTimes = JSON.parse(body).locationsAndTimes;
 
 //console.log(JSON.parse(body));
-pools = TeamListToPools(teams, options);
-});
-res.writeHead(200, {'Content-Type': 'text/html'});
-res.end('post received');
+        pools = TeamListToPools(teams, options);
+      });
+      res.writeHead(200, {'Content-Type': 'text/html'});
+      res.end('post received');
     } else {
 console.log("GET");
       if (req.url === "/index.html") {
         pools = TeamListToPools(teams, options);
 
-        //DumpPools(pools);
-        //console.log(pools);
+DumpPools(pools);
+console.log(pools);
         
         PoolPage(res, pools);
       } else {
