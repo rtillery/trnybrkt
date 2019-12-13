@@ -1,0 +1,80 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang='en'>
+<meta http-equiv='Content-Language' content='en'>
+<script type='text/javascript' src='jquery-3.3.1.min.js'></script>
+<head>
+<meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>
+<link rel="stylesheet" href="entry.css">
+<script src="entry.js"></script>
+</head>
+<body>
+  <form>
+    <table>
+      <tbody>
+        <tr>
+          <td class='label'>Event Name:</td>
+          <td><input type='text' name='name'></td>
+        </tr>
+        <tr>
+          <td class='label'>Event Date:</td>
+          <td><input type='date' name='date' onchange='onDateChange()'>&nbsp;Format:&nbsp;<select id='dateformats'></select></td>
+        </tr>
+        <tr>
+          <td class='label'>Paste Team List Here =></td>
+          <td><textarea name='crtsvData' placeholder='Paste Team List Here' cols='30' rows='5' onchange='onExcelPaste()'></textarea></td>
+        </tr>
+        <tr>
+          <td class='label'>Number of Teams Per Pool:</td>
+          <td><input type='number' name='teamsperpool' min='3' step='1' value='4'></td>
+        </tr>
+        <tr>
+          <td class='label'>Total Number of Pools:</td>
+          <td><input type='number' name='numpools' min='0' step='1' value='0'>&nbsp;<span>(0 = total teams / teams per pool)</span></td>
+        </tr>
+        <tr>
+          <td class='label'>Include Power Pools:</td>
+          <td><input type='checkbox' name='includepowerpools' onClick=pptoggle(this)></td>
+        </tr>
+        <tr>
+          <td class='label disabled powerpooltoggle'>Number of Power Pools:</td>
+          <td><input class='powerpooltoggle' type='number' name='numpowerpools' min='0' max='2' step='1' value='0' disabled></td>
+        </tr>
+        <tr>
+          <td class='label disabled powerpooltoggle'>Teams per Power Pool:</td>
+          <td><input class='powerpooltoggle' type='number' name='teamsperpowerpool' min='3' max='4' value='3' disabled></td>
+        </tr>
+        <tr>
+          <td class='label'>Avoid Same Club in Same Pool:</td>
+          <td><input type='checkbox' name='avoidclub'></td>
+        </tr>
+        <tr>
+          <td class='label'>Dates,<br>Times,<br>& Locations:</td>
+          <td>
+            <table class='rendezvous dynawidthcontainer mappabletable'>
+            <thead>
+              <tr>
+                <th colspan='2'></th>
+                <th class='rvdate'><input type='text' class='dynawidthinput' placeholder='Date'></th>
+              </tr>
+              <tr>
+                <th colspan='2'></th>
+                <th class='rvtime'><input type='text' class='dynawidthinput' placeholder='Time'></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th class='rvvenue'><input type='text' class='dynawidthinput' placeholder='Venue'></th>
+                <th class='rvcourt'><input type='text' class='dynawidthinput' placeholder='Court'></th>
+                <td><input type='checkbox' checked></td>
+              </tr>
+              </tbody>
+            </table>
+          </td>
+        </tr>
+        <tr>
+            <td><br><input type="button" onclick="SendEntryDataToServer()" value="Generate Pools"/></td>
+        </tr>
+    </tbody></table>
+  </form>
+</body>
+</html>

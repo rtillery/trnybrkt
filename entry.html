@@ -4,60 +4,12 @@
 <script type='text/javascript' src='jquery-3.3.1.min.js'></script>
 <head>
 <meta http-equiv='Content-Type' content='text/html; charset=UTF-8'>
-<style>
-body {
-  font-family: serif;
-  font-size: 16px;
-}
-.label {
-  text-align: right;
-}
-.disabled {
-  color: lightgray;
-}
-button {
-  width: 100%;
-  font-weight: 700;
-}
-.event, .event th, .event td {
-  border: 1px solid black;
-  border-collapse: collapse;
-}
-.event tbody tr td, .event thead tr th {
-  text-align: center;
-  width: auto;
-}
-.dynawidth {
-  display: inline-block;
-  font-family: serif;
-  font-weight: 700;
-  font-size: 16px;
-  border: none;
-}
-</style>
+<link rel="stylesheet" href="entry.css">
+
 <script>
 
-function onLocationChange() {
-  var locations = $("textarea[name='locations']").val().split("\n");
-  var times = $("textarea[name='times']").val().split("\n");
-  console.log(locations);
-  console.log(times);
-  var headerrow = "<tr><th></th>";
-  var checkrow = "";
-  for (var col = 0; col < times.length; col++) {
-    headerrow += `<th>${times[col]}</th>`;
-    checkrow += "<td><input type='checkbox' checked></td>";
-  }
-  headerrow += "</tr>";
-  console.log(headerrow);
-  $('.matrix thead').html(headerrow);
-  for (var row = 0; row < locations.length; row++) {
-    var newrow = `<tr><td><b>${locations[row]}</b></td>${checkrow}</tr>`;
-    console.log(newrow);
-    $('.matrix tbody').append(newrow);
-  }
-}
-function onTimeChange() { onLocationChange() }
+var scriptlocation = location.href.replace(document.location.pathname, '');
+console.log("XXX file location:", scriptlocation);
 
 teams = [];
 
@@ -66,7 +18,6 @@ function onExcelPaste() {
     console.log(data);
   var rows = data.split("\n");
 
-teams = [];
   var table = $('<table />');
   for(var y in rows) {
       var cells = rows[y].split("\t");
@@ -86,15 +37,15 @@ var request = new XMLHttpRequest();
 
 function SendData() {
 console.log(`readyState: ${request.readyState}, status: ${request.status}`);
+console.log(request);
   if (request.readyState == 4 && request.status == 200) {
-    alert('Data sent...\n');
-  } else {
-    alert('Connection FAIL,\nCheck connection and Retry!!!');
-    console.log(request);
+    console.log("Data upload complete.");
   }
 }
+
 function SendDataToServer(data) {
-var url = 'https://evening-everglades-20208.herokuapp.com/server.js';
+var url = scriptlocation + "/server.js";
+//var url = 'https://evening-everglades-20208.herokuapp.com/server.js';
 //  var url = 'http:/localhost:4242/server.js';
   request.open('POST', url, true);
   request.onreadystatechange = SendData;
@@ -556,9 +507,13 @@ console.log("$table:", $table);
 
 function pptoggle(elem) {
   var enabled = $(elem).is(":checked");
-  $(".powerpoolenable").prop('disabled', !enabled);
-  if (!enabled)
+  $("input.powerpooltoggle").prop('disabled', !enabled);
+  if (!enabled) {
     $("input[name='numpowerpools']").val(0);
+    $("td.powerpooltoggle").addClass('disabled');
+  } else {
+    $("td.powerpooltoggle").removeClass('disabled');
+  }
 }
 
 $(document).ready(function() {
@@ -611,12 +566,12 @@ $(document).ready(function() {
         <td><input type='checkbox' name='includepowerpools' onClick=pptoggle(this)></td>
       </tr>
       <tr>
-        <td class='label disabled powerpoolenable'>Number of Power Pools:</td>
-        <td><input class='powerpoolenable' type='number' name='numpowerpools' min='0' max='2' step='1' value='0' disabled></td>
+        <td class='label disabled powerpooltoggle'>Number of Power Pools:</td>
+        <td><input class='powerpooltoggle' type='number' name='numpowerpools' min='0' max='2' step='1' value='0' disabled></td>
       </tr>
       <tr>
-        <td class='label disabled powerpoolenable'>Teams per Power Pool:</td>
-        <td><input class='powerpoolenable' type='number' name='teamsperpowerpool' min='3' max='4' value='3' disabled></td>
+        <td class='label disabled powerpooltoggle'>Teams per Power Pool:</td>
+        <td><input class='powerpooltoggle' type='number' name='teamsperpowerpool' min='3' max='4' value='3' disabled></td>
       </tr>
       <tr>
         <td class='label'>Avoid Same Club in Same Pool:</td>
