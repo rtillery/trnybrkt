@@ -288,13 +288,14 @@ var server = http.createServer(
   function (req, res) {
 console.log(`req.url: ${req.url}\n`);
     if (req.method == 'POST') {
-console.log("POST ed");
+console.log("POST start");
       var body = '';
       req.on('data', function (data) {
-console.log(`RECEIVE: \"${data}\"`);
+console.log(`POST on data: \"${data}\"`);
         body += data;
       });
       req.on('end', function (data) {
+console.log("POST on end");
         teams = JSON.parse(body).teams;
 // for (var i = 0; i < teams.length; i++) {
 //   console.log(`${teams[i].friendlyName}`);
@@ -331,6 +332,7 @@ console.log(`RECEIVE: \"${data}\"`);
       });
       res.writeHead(200, {'Content-Type': 'text/html'});
       res.end('post received');
+console.log("POST end");
     } else {
 // console.log("GET");
       if (req.url === "/index.html") {
