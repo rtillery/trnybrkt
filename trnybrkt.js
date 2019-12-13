@@ -288,16 +288,17 @@ var server = http.createServer(
   function (req, res) {
 console.log(`req.url: ${req.url}\n`);
     if (req.method == 'POST') {
-console.log("POST");
+console.log("POST ed");
       var body = '';
       req.on('data', function (data) {
         body += data;
       });
       req.on('end', function (data) {
         teams = JSON.parse(body).teams;
-//for (var i = 0; i < teams.length; i++) {
-//  console.log(`${teams[i].friendlyName}`);
-//}
+
+for (var i = 0; i < teams.length; i++) {
+  console.log(`${teams[i].friendlyName}`);
+}
 
         options.groupName = JSON.parse(body).name;
 
@@ -307,11 +308,11 @@ console.log("POST");
         var dateparts = rawdate.split('-');
         var dateobj = new Date(dateparts[0], dateparts[1] - 1, dateparts[2]);
         options.date = dateobj.toLocaleDateString(language, dateFormat);
-console.log("*** language:", language);
-console.log("*** dateFormat:", dateFormat);
-console.log("*** rawdate:", rawdate);
-console.log("*** dateobj:", dateobj);
-console.log("*** options.date:", options.date);
+// console.log("*** language:", language);
+// console.log("*** dateFormat:", dateFormat);
+// console.log("*** rawdate:", rawdate);
+// console.log("*** dateobj:", dateobj);
+// console.log("*** options.date:", options.date);
 
         options.teamsPerPool = JSON.parse(body).teamsPerPool * 1;
 
@@ -325,18 +326,18 @@ console.log("*** options.date:", options.date);
 
         options.locationsAndTimes = JSON.parse(body).locationsAndTimes;
 
-console.log(JSON.parse(body));
+// console.log(JSON.parse(body));
         pools = TeamListToPools(teams, options);
       });
       res.writeHead(200, {'Content-Type': 'text/html'});
       res.end('post received');
     } else {
-console.log("GET");
+// console.log("GET");
       if (req.url === "/index.html") {
         pools = TeamListToPools(teams, options);
 
-//DumpPools(pools);
-//console.log(pools);
+// DumpPools(pools);
+// console.log(pools);
         
         PoolPage(res, pools);
       } else {
