@@ -48,7 +48,7 @@ var url = scriptlocation + "/server.js";
 //var url = 'https://evening-everglades-20208.herokuapp.com/server.js';
 //  var url = 'http:/localhost:4242/server.js';
   request.open('POST', url, true);
-console.log(`DATA: ${data}`);
+request.setRequestHeader('Content-type', 'application/json');
   request.onreadystatechange = SendData;
   request.send(data);
 }
