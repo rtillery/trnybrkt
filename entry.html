@@ -43,6 +43,16 @@ console.log(request);
   }
 }
 
+// BAD BAD BAD
+function sleep(milliseconds) {
+  var start = new Date().getTime();
+  for (var i = 0; i < 1e7; i++) {
+    if ((new Date().getTime() - start) > milliseconds){
+      break;
+    }
+  }
+}
+
 function SendDataToServer(data) {
 var url = scriptlocation + "/server.js";
 //var url = 'https://evening-everglades-20208.herokuapp.com/server.js';
@@ -51,6 +61,7 @@ var url = scriptlocation + "/server.js";
 request.setRequestHeader('Content-type', 'application/json');
   request.onreadystatechange = SendData;
   request.send(data);
+sleep(5000);
 }
 
 function GatherLocations() {
