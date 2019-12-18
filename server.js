@@ -386,13 +386,7 @@ const server = http.createServer((req, res) => {
 });
 */
 
-<<<<<<< HEAD:trnybrkt.js
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`Server is running (port: ${PORT})...`);
-=======
-port = process.env.PORT || 4242; //8080;
-server.listen(port, () => {
-  console.log(`Server is running (${port})...`);
->>>>>>> refs/remotes/origin/master:server.js
 });
