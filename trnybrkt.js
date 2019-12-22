@@ -283,117 +283,194 @@ function PoolPage(res, pools) {
 const http = require('http');
 const fs = require('fs');
 
-/* https://stackoverflow.com/a/28838314 */
-var server = http.createServer(
-  function (req, res) {
-console.log(`req.url: ${req.url}\n`);
-    if (req.method == 'POST') {
-console.log("POST start");
-      var body = '';
-      req.on('data', function (data) {
-console.log(`POST on data: \"${data}\"`);
-        body += data;
-      });
-      req.on('end', function (data) {
-console.log("POST on end");
-        teams = JSON.parse(body).teams;
-// for (var i = 0; i < teams.length; i++) {
-//   console.log(`${teams[i].friendlyName}`);
-// }
+function ServerDefaultGetHandler(req, res) {
+  console.log(`req.url: ${req.url}`);
+  fs.readFile('./' + req.url, function(err, data) {
+    if (!err) {
+      var dotoffset = req.url.lastIndexOf('.');
+      var mimetype = dotoffset == -1
+                    ? 'text/plain'
+                    : {
+                      '.html' : 'text/html',
+                      '.ico' : 'image/x-icon',
+                      '.jpg' : 'image/jpeg',
+                      '.png' : 'image/png',
+                      '.gif' : 'image/gif',
+                      '.css' : 'text/css',
+                      '.js' : 'text/javascript'
+                    }[ req.url.substr(dotoffset) ];
+      res.setHeader('Content-type' , mimetype);
+      res.end(data);
+    } else {
+      console.log ('file not found: ' + req.url);
+      res.writeHead(404, "Not Found");
+      res.end();
+    }
+  });
+}
 
-        options.groupName = JSON.parse(body).name;
+function ServerGetHandler(req, res) {
+  if (req.url === "/index.html") {
+    pools = TeamListToPools(teams, options);
+    PoolPage(res, pools);
+  } else {
+    ServerDefaultGetHandler(req, res);
+  }
+}
 
-        var language = JSON.parse(body).language;
-        var dateFormat = JSON.parse(body).dateFormat;
-        var rawdate = JSON.parse(body).date;
-        var dateparts = rawdate.split('-');
-        var dateobj = new Date(dateparts[0], dateparts[1] - 1, dateparts[2]);
-        options.date = dateobj.toLocaleDateString(language, dateFormat);
+function ServerPostHandler(req, res) {
+  var body = '';
+  req.on('data', function (data) {
+    console.log(`POST on data: \"${data}\"`);
+    body += data;
+  });
+  req.on('end', function (data) {
+    console.log("POST on end");
+    teams = JSON.parse(body).teams;
+
+    options.groupName = JSON.parse(body).name;
+
+    var language = JSON.parse(body).language;
+    var dateFormat = JSON.parse(body).dateFormat;
+    var rawdate = JSON.parse(body).date;
+    var dateparts = rawdate.split('-');
+    var dateobj = new Date(dateparts[0], dateparts[1] - 1, dateparts[2]);
+    options.date = dateobj.toLocaleDateString(language, dateFormat);
 // console.log("*** language:", language);
 // console.log("*** dateFormat:", dateFormat);
 // console.log("*** rawdate:", rawdate);
 // console.log("*** dateobj:", dateobj);
 // console.log("*** options.date:", options.date);
-
-        options.teamsPerPool = JSON.parse(body).teamsPerPool * 1;
-
-        options.totalPools = (JSON.parse(body).numPools * 1) | Math.ceil(teams.length / options.teamsPerPool);
-
-        options.powerPools = (JSON.parse(body).numPowerPools * 1);
-
-        options.teamsPerPowerPool = (JSON.parse(body).teamsPerPowerPool * 1);
-
-        options.avoidSameClub = JSON.parse(body).avoidClub;
-
-        options.locationsAndTimes = JSON.parse(body).locationsAndTimes;
-
+    
+    options.teamsPerPool = JSON.parse(body).teamsPerPool * 1;
+    options.totalPools = (JSON.parse(body).numPools * 1) | Math.ceil(teams.length / options.teamsPerPool);
+    options.powerPools = (JSON.parse(body).numPowerPools * 1);
+    options.teamsPerPowerPool = (JSON.parse(body).teamsPerPowerPool * 1);
+    options.avoidSameClub = JSON.parse(body).avoidClub;
+    options.locationsAndTimes = JSON.parse(body).locationsAndTimes;
+    
 // console.log(JSON.parse(body));
-        pools = TeamListToPools(teams, options);
-      });
-      res.writeHead(200, {'Content-Type': 'text/html'});
-      res.end('post received');
-console.log("POST end");
-    } else {
-// console.log("GET");
-      if (req.url === "/index.html") {
-        pools = TeamListToPools(teams, options);
-
-// DumpPools(pools);
-// console.log(pools);
-        
-        PoolPage(res, pools);
-      } else {
-        fs.readFile('./' + req.url, function(err, data) {
-          if (!err) {
-            var dotoffset = req.url.lastIndexOf('.');
-            var mimetype = dotoffset == -1
-                          ? 'text/plain'
-                          : {
-                            '.html' : 'text/html',
-                            '.ico' : 'image/x-icon',
-                            '.jpg' : 'image/jpeg',
-                            '.png' : 'image/png',
-                            '.gif' : 'image/gif',
-                            '.css' : 'text/css',
-                            '.js' : 'text/javascript'
-                          }[ req.url.substr(dotoffset) ];
-            res.setHeader('Content-type' , mimetype);
-            res.end(data);
-//console.log( req.url, mimetype );
-          } else {
-            console.log ('file not found: ' + req.url);
-            res.writeHead(404, "Not Found");
-            res.end();
-          }
-        });
-      }
-    }
+    pools = TeamListToPools(teams, options);
   });
 
-// BAD BAD BAD
-function sleep(milliseconds) {
-  var start = new Date().getTime();
-  for (var i = 0; i < 1e7; i++) {
-    if ((new Date().getTime() - start) > milliseconds){
-      break;
-    }
-  }
+  console.log("Sleeping 5 seconds");
+  setTimeout(function(){
+    console.log("POST end");
+  }, 5000);
+
 }
 
-sleep(5000);
+function ServerRequestListener(req, res) {
+  console.log(`req.url: ${req.url}\n`);
+  console.log(`req.method: ${req.method}`);
+  if (req.method == 'GET') {
+    ServerGetHandler(req, res);
+  } else if (req.method == 'POST') {
+    ServerPostHandler(req, res);
+  }
+  console.log("Server Request complete");
+}
 
-/*
-const server = http.createServer((req, res) => {
-  PoolPage(res, pools);
-});
+var server = http.createServer(ServerRequestListener);
 
+// /* https://stackoverflow.com/a/28838314 */
+// var server = http.createServer(
+//   function (req, res) {
+// console.log(`req.url: ${req.url}\n`);
+//     if (req.method == 'POST') {
+// console.log("POST start");
+//       var body = '';
+//       req.on('data', function (data) {
+// console.log(`POST on data: \"${data}\"`);
+//         body += data;
+//       });
+//       req.on('end', function (data) {
+// console.log("POST on end");
+//         teams = JSON.parse(body).teams;
+// // for (var i = 0; i < teams.length; i++) {
+// //   console.log(`${teams[i].friendlyName}`);
+// // }
 
-const server = http.createServer((req, res) => {
-  res.end('Hello World\n');
-});
-*/
+//         options.groupName = JSON.parse(body).name;
+
+//         var language = JSON.parse(body).language;
+//         var dateFormat = JSON.parse(body).dateFormat;
+//         var rawdate = JSON.parse(body).date;
+//         var dateparts = rawdate.split('-');
+//         var dateobj = new Date(dateparts[0], dateparts[1] - 1, dateparts[2]);
+//         options.date = dateobj.toLocaleDateString(language, dateFormat);
+// // console.log("*** language:", language);
+// // console.log("*** dateFormat:", dateFormat);
+// // console.log("*** rawdate:", rawdate);
+// // console.log("*** dateobj:", dateobj);
+// // console.log("*** options.date:", options.date);
+
+//         options.teamsPerPool = JSON.parse(body).teamsPerPool * 1;
+
+//         options.totalPools = (JSON.parse(body).numPools * 1) | Math.ceil(teams.length / options.teamsPerPool);
+
+//         options.powerPools = (JSON.parse(body).numPowerPools * 1);
+
+//         options.teamsPerPowerPool = (JSON.parse(body).teamsPerPowerPool * 1);
+
+//         options.avoidSameClub = JSON.parse(body).avoidClub;
+
+//         options.locationsAndTimes = JSON.parse(body).locationsAndTimes;
+
+// // console.log(JSON.parse(body));
+//         pools = TeamListToPools(teams, options);
+//       });
+//       res.writeHead(200, {'Content-Type': 'text/html'});
+//       res.end('post received');
+//     } else {
+//       if (req.url === "/index.html") {
+//         pools = TeamListToPools(teams, options);
+
+// // DumpPools(pools);
+// // console.log(pools);
+        
+//         PoolPage(res, pools);
+//       } else {
+//         fs.readFile('./' + req.url, function(err, data) {
+//           if (!err) {
+//             var dotoffset = req.url.lastIndexOf('.');
+//             var mimetype = dotoffset == -1
+//                           ? 'text/plain'
+//                           : {
+//                             '.html' : 'text/html',
+//                             '.ico' : 'image/x-icon',
+//                             '.jpg' : 'image/jpeg',
+//                             '.png' : 'image/png',
+//                             '.gif' : 'image/gif',
+//                             '.css' : 'text/css',
+//                             '.js' : 'text/javascript'
+//                           }[ req.url.substr(dotoffset) ];
+//             res.setHeader('Content-type' , mimetype);
+//             res.end(data);
+// //console.log( req.url, mimetype );
+//           } else {
+//             console.log ('file not found: ' + req.url);
+//             res.writeHead(404, "Not Found");
+//             res.end();
+//           }
+//         });
+//       }
+//     }
+// });
+
+// console.log("Sleeping 5 seconds");
+// setTimeout(function(){
+//   console.log("POST end");
+// }, 5000);
 
 const port = process.env.PORT || 5000;
 server.listen(port, () => {
   console.log(`Server is running (port: ${port})...`);
 });
+
+// const express = require('express')
+// const app = express()
+
+// app.get('/', (req, res) => res.send('Hello World!'))
+
+// app.listen(port, () => console.log(`Example app listening on port ${port}!`))
