@@ -353,10 +353,10 @@ function ServerPostHandler(req, res) {
     pools = TeamListToPools(teams, options);
   });
 
-  console.log("Sleeping 5 seconds");
-  setTimeout(function(){
-    console.log("POST end");
-  }, 5000);
+  // console.log("Sleeping 5 seconds");
+  // setTimeout(function(){
+  //   console.log("POST end");
+  // }, 5000);
 
 }
 
