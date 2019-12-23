@@ -283,6 +283,9 @@ function PoolPage(res, pools) {
 const http = require('http');
 const fs = require('fs');
 
+const express = require('express')
+const app = express()
+
 function ServerDefaultGetHandler(req, res) {
   console.log(`req.url: ${req.url}`);
   fs.readFile('./' + req.url, function(err, data) {
@@ -309,10 +312,22 @@ function ServerDefaultGetHandler(req, res) {
   });
 }
 
+const nunjucks = require('nunjucks');
+nunjucks.configure('', {
+  autoescape: true,
+  express: app
+});
+
 function ServerGetHandler(req, res) {
   if (req.url === "/index.html") {
     pools = TeamListToPools(teams, options);
     PoolPage(res, pools);
+  } else if (req.url === "/entry.html") {
+    res.render('entry.html.j2', { times: [ "8:00 AM", "3:00 AM" ],
+                                  date: "Date Standin",
+                                  venues: [ { name: "Venue 1", courts: ["Court 1", "Court 2", "Court 3", "Court 4"]},
+                                            { name: "Venue 2", courts: ["Court 1", "Court 2", "Court 3"]} ]
+                                   });
   } else {
     ServerDefaultGetHandler(req, res);
   }
@@ -361,9 +376,6 @@ function ServerPostHandler(req, res) {
 }
 
 const port = process.env.PORT || 5000;
-
-const express = require('express')
-const app = express()
 
 app.get("/*", ServerGetHandler);
 app.post("/*", ServerPostHandler);
