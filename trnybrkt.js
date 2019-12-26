@@ -326,7 +326,7 @@ function ServerGetHandler(req, res) {
     res.render('entry.html.j2', { times: [ "8:00 AM", "3:00 AM" ],
                                   date: "Date Standin",
                                   venues: [ { name: "Venue 1", courts: ["Court 1", "Court 2", "Court 3", "Court 4"]},
-                                            { name: "Venue 2", courts: ["Court 1", "Court 2", "Court 3"]} ]
+                                            { name: "Venue 2", courts: ["Court 1", "Court 2", "Court 3", "Court 4"]} ]
                                    });
   } else {
     ServerDefaultGetHandler(req, res);
