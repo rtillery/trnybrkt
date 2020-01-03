@@ -1,5 +1,5 @@
 $(document).ready(function() {
-  $('.mappabletable').scanTable();
+  MappableTable.scanTable($('.mappabletable'));
 
   $('.dynawidthcontainer').on('input', DynaWidth.onInput);
   $('.dynawidthinput').trigger('input');
@@ -7,8 +7,9 @@ $(document).ready(function() {
 //  $('.rendezvous').keydown(OnDynaWidthKeyDown);
 //  $('.rendezvous').keyup(OnDynaWidthKeyUp);
 
-var rv = new RendezvousTable($('.rendezvous'));
-$('.rendezvous').rvDeleteVenueRow(0);
+var $rvtables = $(".rendezvous");
+$rvtables.each(function() { new RendezvousTable(this) });
+$rvtables.each(function() { this.rvobj.DeleteVenueRow(0) });
 });
 
 // DynaWidth OBJECT
@@ -122,17 +123,24 @@ var MappableTable = {
 
 // RendezvousTable OBJECT
 // !!! Requires table to also be DynaWidth table and MappableTable.
-var RendezvousTable = function($table) {
-  $table.fn.rvDeleteVenueRow = function(top) {
-    console.log("RendezvousTable::rvDeleteVenueRow() called");
-  };
-  return {
-    DATEHEADER: "<th class='rvdate'><input type='text' class='dynawidth' placeholder='Date'></th>",
-    TIMEHEADER: "<th class='rvtime'><input type='text' class='dynawidth' placeholder='Time'></th>",
-    VENUEHEADER: "<th class='rvvenue'><input type='text' class='dynawidth' placeholder='Venue'></th>",
-    COURTHEADER: "<th class='rvcourt'><input type='text' class='dynawidth' placeholder='Court'></th>",
-    RENDEZVOUS: "<td><input type='checkbox' checked></td>",
-  };
+function RendezvousTable($table) {
+  this.$elem = $table;
+  console.assert(!$table.rvobj);
+  $table.rvobj = this;
+  if (!RendezvousTable.prototype.DeleteVenueRow) {
+
+    RendezvousTable.prototype.DATEHEADER = "<th class='rvdate'><input type='text' class='dynawidth' placeholder='Date'></th>";
+    RendezvousTable.prototype.TIMEHEADER = "<th class='rvtime'><input type='text' class='dynawidth' placeholder='Time'></th>";
+    RendezvousTable.prototype.VENUEHEADER = "<th class='rvvenue'><input type='text' class='dynawidth' placeholder='Venue'></th>";
+    RendezvousTable.prototype.COURTHEADER = "<th class='rvcourt'><input type='text' class='dynawidth' placeholder='Court'></th>";
+    RendezvousTable.prototype.RENDEZVOUS = "<td><input type='checkbox' checked></td>";
+
+    RendezvousTable.prototype.DeleteVenueRow = function(top) {
+      console.log("RendezvousTable::rvDeleteVenueRow() called");
+    }
+
+  }
+
 /*
   onDynaWidthInputKeyDown: function($dwi, event) {
     var $dwi = $(dwi);
